@@ -5,10 +5,12 @@ const REVALIDATE_SECONDS = 30;
 
 /** `BACKEND_URL` is the Vercel service binding (runtime only); `API_INTERNAL_URL` is the Docker/dev address. */
 function apiBase() {
-  const origin = process.env.BACKEND_URL ?? process.env.API_INTERNAL_URL ?? "http://localhost:4010";
-  return `${origin.replace(/\/+$/, "")}/api/v1`;
+  const origin = process.env.BACKEND_URL ?? process.env.API_INTERNAL_URL;
+  if (!origin && process.env.VERCEL) {
+    throw new Error("BACKEND_URL binding missing: deploy from the repo root so vercel.json services are used");
+  }
+  return `${(origin ?? "http://localhost:4010").replace(/\/+$/, "")}/api/v1`;
 }
-
 /** Server-side read from the public API. Returns null on 404. */
 export async function serverGet<T>(path: string): Promise<T | null> {
   const res = await fetch(`${apiBase()}${path}`, { next: { revalidate: REVALIDATE_SECONDS } });
