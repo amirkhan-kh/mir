@@ -13,7 +13,7 @@
 - [ ] 2.3 Online payment (Payme / Click) for card checkout.
 - [ ] 3.1 Lighthouse 100 on `/`, `/mahsulot/[slug]`, `/login`.
 - [ ] 3.2 Named tests (checkout stock decrement, cancel restore, idempotency).
-- [ ] 3.3 Deploy (VPS) — remove default admin, HTTPS. Frontend Vercel config ready (`frontend/vercel.json`, `API_INTERNAL_URL` required); API + DB host still open.
+- [ ] 3.3 Deploy (VPS) — remove default admin, HTTPS. Vercel Services config ready (root `vercel.json`: frontend + backend, `BACKEND_URL` binding, Blob uploads); managed PostgreSQL + Blob store + live deploy still open.
 - [ ] 3.4a E2E setup: Playwright config, fixtures, factories, global-setup + `AUTH-*`, `G-*` rows (`docs/TESTING.md`).
 - [ ] 3.4b E2E P0 shop: `CART-*`, `CHK-*`, `TRK-*`, `ORD-*`.
 - [ ] 3.4c E2E P1: `SHOP-*`, `PDP-*`, `PRD-*`, `CAT-*`, `BNR-*`, `DSH-*` + their `L*` rows.

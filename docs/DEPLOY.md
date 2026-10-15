@@ -5,7 +5,7 @@ Only when the prompt asks (task `3.3` or "deploy"). Otherwise `Need permit: depl
 ## Target
 
 - One VPS with Docker Compose (`db`, `backend`, `frontend`) behind a reverse proxy (Caddy/Nginx) with HTTPS.
-- Or: frontend on Vercel (`API_INTERNAL_URL` → API host), API as one process + managed PostgreSQL.
+- Or: one Vercel project with Services (root `vercel.json`): `frontend` (Next.js) public at `/`, `backend` (Express) public at `/api/*`, `/uploads/*`, `/health`. The frontend reads the API through the `BACKEND_URL` binding. Needs managed PostgreSQL (`DATABASE_URL`) and object storage for uploads — Vercel functions have no persistent disk and ignore `express.static`.
 
 ## Pre-flight (all must be true)
 

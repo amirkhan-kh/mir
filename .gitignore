@@ -13,8 +13,7 @@ next-env.d.ts
 .DS_Store
 *.log
 
-backend/uploads/*
-!backend/uploads/seed/
+backend/uploads/
 
 playwright-report/
 test-results/

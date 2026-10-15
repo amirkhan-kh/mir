@@ -1,3 +1,5 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -17,9 +19,12 @@ import { settingsPublic, settingsRouter } from "./modules/settings/router.js";
 import { uploadsRouter } from "./modules/uploads/router.js";
 import { usersRouter } from "./modules/users/router.js";
 
+const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../public");
+
 export const app = express();
 
-app.set("trust proxy", "loopback");
+// Vercel's edge overwrites X-Forwarded-For with the client IP; elsewhere only a local proxy is trusted.
+app.set("trust proxy", process.env.VERCEL ? true : "loopback");
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
 app.use(cookieParser());
@@ -30,6 +35,8 @@ app.get("/health", async (_req, res) => {
   res.json({ ok: true });
 });
 
+// On Vercel `public/` is served by the CDN and express.static is skipped; elsewhere both are served here.
+app.use(express.static(publicDir, { maxAge: "30d", immutable: true, index: false }));
 app.use("/uploads", express.static(config.uploadDir, { maxAge: "30d", immutable: true, fallthrough: false }));
 
 const api = express.Router();

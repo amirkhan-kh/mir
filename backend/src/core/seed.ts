@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import bcrypt from "bcryptjs";
 import { DEFAULT_STORE, putStore } from "../modules/settings/repository.js";
 import { config } from "./config.js";
@@ -13,8 +14,10 @@ const STAFF = [
   { username: "courier2", full_name: "Rustam Kuryer", phone: "+998901000003", role: "courier" },
 ];
 
+const seedDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../public/uploads/seed");
+
 function seedImages(img: string): string[] {
-  const dir = path.join(config.uploadDir, "seed", img);
+  const dir = path.join(seedDir, img);
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir)

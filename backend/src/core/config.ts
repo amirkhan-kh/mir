@@ -11,5 +11,7 @@ export const config = {
   adminPassword: env.ADMIN_PASSWORD ?? "admin123",
   seedDemo: (env.SEED_DEMO ?? "true") === "true",
   uploadDir: path.resolve(env.UPLOAD_DIR ?? "uploads"),
+  /** Set when a Vercel Blob store is connected; uploads then go to Blob instead of `uploadDir`. */
+  blobToken: env.BLOB_READ_WRITE_TOKEN,
   isProd: env.NODE_ENV === "production",
 };

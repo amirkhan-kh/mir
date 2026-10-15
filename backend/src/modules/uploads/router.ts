@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { put } from "@vercel/blob";
 import express, { Router } from "express";
 import { z } from "zod";
 import { allow } from "../../core/auth.js";
@@ -33,9 +34,19 @@ uploadsRouter.post(
     if (!type || !Buffer.isBuffer(body) || body.length === 0) throw invalid("Faqat JPG, PNG, WEBP yoki AVIF rasm yuklang");
     if (!type.magic(body)) throw invalid("Fayl rasm emas yoki buzilgan");
     const month = new Date().toISOString().slice(0, 7);
+    const name = `${crypto.randomBytes(12).toString("hex")}.${type.ext}`;
+    if (config.blobToken) {
+      const blob = await put(`uploads/${month}/${name}`, body, {
+        access: "public",
+        contentType: String(req.headers["content-type"]).split(";")[0].trim(),
+        addRandomSuffix: false,
+        token: config.blobToken,
+      });
+      res.status(201).json({ url: blob.url });
+      return;
+    }
     const dir = path.join(config.uploadDir, month);
     await fs.mkdir(dir, { recursive: true });
-    const name = `${crypto.randomBytes(12).toString("hex")}.${type.ext}`;
     await fs.writeFile(path.join(dir, name), body);
     res.status(201).json({ url: `/uploads/${month}/${name}` });
   },

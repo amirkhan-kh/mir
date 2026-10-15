@@ -1,4 +1,4 @@
-/** Demo catalog. Images live in `uploads/seed/<img>/<n>.webp`. */
+/** Demo catalog. Images live in `public/uploads/seed/<img>/<n>.webp`. */
 
 export const CATEGORIES = [
   { slug: "smartfonlar", name: "Smartfonlar", icon: "smartphone", sort: 1, active: true },
