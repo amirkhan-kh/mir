@@ -175,7 +175,7 @@ export function CheckoutForm({ store }: { store: Store }) {
                 )}
               </Field>
               <Field label="Manzil" hint="Tuman, ko'cha, uy, xonadon, mo'ljal">
-                {(id) => <Input id={id} name="address" required minLength={5} maxLength={240} autoComplete="street-address" placeholder="Chilonzor, 9-kvartal, 12-uy, 45-xonadon" />}
+                {(id) => <Input id={id} name="address" required minLength={5} maxLength={240} autoComplete="street-address" placeholder="Bobur shoh ko'chasi, 12-uy, 45-xonadon" />}
               </Field>
             </div>
           ) : (

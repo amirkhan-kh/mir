@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
     };
   },
   images: {
+    // /_next/image returns 404 under Vercel Services; images are pre-sized webp, so serve them as-is there.
+    unoptimized: onVercel,
     qualities: [75, 90],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2678400,

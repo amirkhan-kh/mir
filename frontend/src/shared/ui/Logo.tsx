@@ -26,8 +26,8 @@ export function Logo({ href = "/", inverted = false }: { href?: string; inverted
       <Image
         src={inverted ? "/brand/logo-light.webp" : "/brand/logo.webp"}
         alt="МИР — maishiy texnika va elektronika"
-        width={558}
-        height={293}
+        width={374}
+        height={191}
         loading={inverted ? "lazy" : "eager"}
         sizes="96px"
         className="h-12 w-auto"

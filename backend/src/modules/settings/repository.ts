@@ -26,15 +26,15 @@ export const DEFAULT_STORE: Store = {
   tagline: "Maishiy texnika va elektronika",
   phone: "+998 90 000 00 00",
   phone2: "",
-  address: "Toshkent sh., Chilonzor tumani",
+  address: "Andijon shahri",
   hours: "Har kuni 09:00 – 20:00",
   telegram: "https://t.me/",
   instagram: "https://instagram.com/",
   delivery_fee: 30000,
   free_delivery_from: 1000000,
-  delivery_note: "Toshkent bo'ylab 1–2 kunda o'z kuryerlarimiz yetkazadi",
+  delivery_note: "Andijon bo'ylab 1–2 kunda o'z kuryerlarimiz yetkazadi",
   regions: [
-    "Toshkent shahri", "Toshkent viloyati", "Andijon", "Buxoro", "Farg'ona", "Jizzax", "Xorazm", "Namangan",
+    "Andijon", "Toshkent shahri", "Toshkent viloyati", "Buxoro", "Farg'ona", "Jizzax", "Xorazm", "Namangan",
     "Navoiy", "Qashqadaryo", "Qoraqalpog'iston", "Samarqand", "Sirdaryo", "Surxondaryo",
   ],
   installment: [
