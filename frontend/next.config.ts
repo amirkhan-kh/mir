@@ -8,12 +8,17 @@ const nextConfig: NextConfig = {
   output: onVercel ? undefined : "standalone",
   poweredByHeader: false,
   async rewrites() {
-    // On Vercel the root vercel.json routes /api and /uploads to the backend service before Next sees them.
-    if (onVercel) return [];
-    return [
-      { source: "/api/v1/:path*", destination: `${api}/api/v1/:path*` },
-      { source: "/uploads/:path*", destination: `${api}/uploads/:path*` },
-    ];
+    // On Vercel the root vercel.json decides whether /api goes to the backend service or the mock route.
+    if (onVercel || process.env.MOCK_API === "1") return [];
+    // beforeFiles so the real API wins over the mock route at app/api/v1.
+    return {
+      beforeFiles: [
+        { source: "/api/v1/:path*", destination: `${api}/api/v1/:path*` },
+        { source: "/uploads/:path*", destination: `${api}/uploads/:path*` },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
   },
   images: {
     qualities: [75, 90],

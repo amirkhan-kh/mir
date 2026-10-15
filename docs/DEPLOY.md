@@ -7,6 +7,23 @@ Only when the prompt asks (task `3.3` or "deploy"). Otherwise `Need permit: depl
 - One VPS with Docker Compose (`db`, `backend`, `frontend`) behind a reverse proxy (Caddy/Nginx) with HTTPS.
 - Or: one Vercel project with Services (root `vercel.json`): `frontend` (Next.js) public at `/`, `backend` (Express) public at `/api/*`, `/uploads/*`, `/health`. The frontend reads the API through the `BACKEND_URL` binding. Needs managed PostgreSQL (`DATABASE_URL`) and object storage for uploads — Vercel functions have no persistent disk and ignore `express.static`.
 
+### Vercel mock mode (current)
+
+The backend service is disconnected; only `frontend` is deployed. With no `BACKEND_URL` binding, server reads come from `frontend/src/shared/mock` (generated from `backend/src/core/seed-data.ts`), `/api/v1/*` is answered by `frontend/src/app/api/v1/[...path]/route.ts` (catalog reads and cart quote; checkout, reviews and login return 503), and seed images are served from `frontend/public/uploads/seed`. Locally: `MOCK_API=1 npm run dev`.
+
+To reconnect the backend, add back to the root `vercel.json`:
+
+```json
+"backend": {
+  "root": "backend",
+  "framework": "express",
+  "entrypoint": "src/server.ts",
+  "functions": { "src/server.ts": { "includeFiles": "{migrations,public/uploads/seed}/**" } }
+}
+```
+
+plus `"bindings": [{ "type": "service", "service": "backend", "format": "url", "env": "BACKEND_URL" }]` on `frontend`, and rewrites `/api/(.*)`, `/uploads/(.*)`, `/health` → `{ "service": "backend" }` before the catch-all.
+
 ## Pre-flight (all must be true)
 
 - [ ] `npm run typecheck` green in both packages; `npm run build` green in `frontend/`.
