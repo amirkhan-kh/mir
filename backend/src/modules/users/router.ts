@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { allow } from "../../core/auth.js";
 import { pool } from "../../core/db.js";
-import { idParam, parse } from "../../core/http.js";
+import { idParam, parse, zmsg } from "../../core/http.js";
 import { normalizePhone } from "../../core/text.js";
 import * as repo from "./repository.js";
 import * as service from "./service.js";
@@ -16,7 +16,7 @@ const phone = z
   .max(20)
   .optional()
   .transform((v) => (v ? normalizePhone(v) : null));
-const password = z.string().min(8, "Kamida 8 belgi").max(200);
+const password = z.string().min(8, zmsg("Минимум 8 символов", "Кеминде 8 белги")).max(200);
 
 const createSchema = z.object({
   username: z
@@ -24,7 +24,7 @@ const createSchema = z.object({
     .trim()
     .min(3)
     .max(40)
-    .regex(/^[a-z0-9._-]+$/i, "Faqat lotin harflari, raqam, . _ -"),
+    .regex(/^[a-z0-9._-]+$/i, zmsg("Только латинские буквы, цифры, . _ -", "Латын тамгалары, сандар, . _ - гана")),
   password,
   full_name: z.string().trim().min(2).max(120),
   phone,

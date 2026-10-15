@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "@/shared/i18n/client";
 
 /** Mir mark: power glyph above the lime→leaf swoosh from the brand logo. */
 export function LogoMark({ className = "size-10" }: { className?: string }) {
@@ -21,11 +24,12 @@ export function LogoMark({ className = "size-10" }: { className?: string }) {
 }
 
 export function Logo({ href = "/", inverted = false }: { href?: string; inverted?: boolean }) {
+  const t = useT();
   return (
-    <Link href={href} aria-label="Mir — bosh sahifa" className="inline-flex shrink-0 items-center">
+    <Link href={href} aria-label={t.logo.home} className="inline-flex shrink-0 items-center">
       <Image
         src={inverted ? "/brand/logo-light.webp" : "/brand/logo.webp"}
-        alt="МИР — maishiy texnika va elektronika"
+        alt={t.logo.alt}
         width={374}
         height={191}
         loading={inverted ? "lazy" : "eager"}

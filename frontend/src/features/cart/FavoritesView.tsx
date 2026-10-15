@@ -2,6 +2,7 @@
 
 import { Heart } from "lucide-react";
 import { ProductCard } from "@/features/storefront/ProductCard";
+import { useT } from "@/shared/i18n/client";
 import type { InstallmentPlan, ProductList } from "@/shared/lib/types";
 import { useApi } from "@/shared/lib/useApi";
 import { ButtonLink } from "@/shared/ui/Button";
@@ -9,13 +10,14 @@ import { Empty, ErrorState, Loading } from "@/shared/ui/States";
 import { useFavorites } from "./store";
 
 export function FavoritesView({ plan }: { plan: InstallmentPlan | null }) {
+  const t = useT();
   const ids = useFavorites();
   const { data, error, loading, reload } = useApi<ProductList>(ids.length ? `/public/products?ids=${ids.join(",")}&limit=60` : null);
 
   if (!ids.length) {
     return (
       <div className="rounded-3xl bg-white">
-        <Empty icon={<Heart className="size-6" aria-hidden />} title="Sevimlilar ro'yxati bo'sh" hint="Tovar kartasidagi ♡ belgisini bosing — u shu yerda saqlanadi." action={<ButtonLink href="/katalog">Katalogga o'tish</ButtonLink>} />
+        <Empty icon={<Heart className="size-6" aria-hidden />} title={t.favorites.empty} hint={t.favorites.emptyHint} action={<ButtonLink href="/katalog">{t.favorites.toCatalog}</ButtonLink>} />
       </div>
     );
   }

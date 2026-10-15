@@ -1,9 +1,11 @@
 "use client";
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useT } from "@/shared/i18n/client";
 import { formatMoney } from "@/shared/lib/format";
 
 export function SalesChart({ data }: { data: { day: string; sales: number; orders: number }[] }) {
+  const t = useT().admin.dashboard;
   const rows = data.map((d) => ({ ...d, label: d.day.slice(8, 10) + "." + d.day.slice(5, 7) }));
   return (
     <div className="h-64 w-full">
@@ -19,8 +21,8 @@ export function SalesChart({ data }: { data: { day: string; sales: number; order
           <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} stroke="#6b7165" />
           <YAxis tickLine={false} axisLine={false} fontSize={12} stroke="#6b7165" width={48} tickFormatter={(v: number) => (v >= 1e6 ? `${Math.round(v / 1e6)}m` : `${Math.round(v / 1e3)}k`)} />
           <Tooltip
-            formatter={(v, name) => (name === "sales" ? [formatMoney(Number(v)), "Savdo"] : [v, "Buyurtma"])}
-            labelFormatter={(l) => `Sana: ${l}`}
+            formatter={(v, name) => (name === "sales" ? [formatMoney(Number(v)), t.chartSales] : [v, t.chartOrders])}
+            labelFormatter={(l) => t.chartDate(String(l))}
             contentStyle={{ borderRadius: 12, border: "1px solid #e0e3db", fontSize: 13 }}
           />
           <Area type="monotone" dataKey="sales" stroke="#3e8a1b" strokeWidth={2.5} fill="url(#sales-fill)" />

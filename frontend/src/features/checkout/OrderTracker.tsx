@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/shared/lib/api";
 import { formatDate, formatMoney, formatPhone } from "@/shared/lib/format";
-import { DELIVERY, ORDER_STATUS, ORDER_STEP, PAYMENT } from "@/shared/lib/status";
+import { useT } from "@/shared/i18n/client";
 import type { Order, Store } from "@/shared/lib/types";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
@@ -17,6 +17,7 @@ const KEY = "mir_last_order";
 const STEPS = ["new", "confirmed", "delivering", "delivered"] as const;
 
 export function TrackForm({ initialNumber = "" }: { initialNumber?: string }) {
+  const t = useT();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -36,25 +37,26 @@ export function TrackForm({ initialNumber = "" }: { initialNumber?: string }) {
           router.push(`/buyurtma/${number}`);
           router.refresh();
         } catch (err) {
-          setError(err instanceof ApiError ? err.message : "Xatolik");
+          setError(err instanceof ApiError ? err.message : t.common.error);
         } finally {
           setSaving(false);
         }
       }}
     >
-      <Field label="Buyurtma raqami">{(id) => <Input id={id} name="number" required defaultValue={initialNumber} placeholder="MIR-1001" pattern="[A-Za-z]{3}-?\d+" maxLength={20} />}</Field>
-      <Field label="Telefon raqam" hint="Buyurtma berilgan raqam">
+      <Field label={t.track.number}>{(id) => <Input id={id} name="number" required defaultValue={initialNumber} placeholder="MIR-1001" pattern="[A-Za-z]{3}-?\d+" maxLength={20} />}</Field>
+      <Field label={t.track.phone} hint={t.track.phoneHint}>
         {(id) => <Input id={id} name="phone" type="tel" inputMode="tel" required placeholder="+998 90 123 45 67" minLength={9} maxLength={20} />}
       </Field>
       {error ? <Alert>{error}</Alert> : null}
       <Button type="submit" variant="dark" size="lg" className="w-full" disabled={saving}>
-        {saving ? "Qidirilmoqda…" : "Holatini ko'rish"}
+        {saving ? t.track.searching : t.track.submit}
       </Button>
     </form>
   );
 }
 
 export function OrderTracker({ number, store }: { number: string; store: Store }) {
+  const t = useT();
   const [order, setOrder] = useState<Order | null>(null);
   const [fresh, setFresh] = useState(false);
   const [state, setState] = useState<"loading" | "form" | "ready" | "error">("loading");
@@ -88,8 +90,8 @@ export function OrderTracker({ number, store }: { number: string; store: Store }
   if (state === "form" || state === "error") {
     return (
       <div className="mx-auto max-w-md rounded-3xl bg-white p-6">
-        <h1 className="mb-1 font-display text-xl font-semibold">Buyurtma {number}</h1>
-        <p className="mb-5 text-sm text-ink-500">Holatini ko'rish uchun telefon raqamingizni kiriting.</p>
+        <h1 className="mb-1 font-display text-xl font-semibold">{t.track.order(number)}</h1>
+        <p className="mb-5 text-sm text-ink-500">{t.track.enterPhone}</p>
         {error ? <div className="mb-4"><Alert>{error}</Alert></div> : null}
         <TrackForm initialNumber={number} />
       </div>
@@ -108,24 +110,24 @@ export function OrderTracker({ number, store }: { number: string; store: Store }
         <div className="relative overflow-hidden rounded-3xl bg-ink-950 p-6 text-white sm:p-8">
           <div className="brand-gradient absolute -right-16 -top-16 size-56 rounded-full opacity-40 blur-3xl" aria-hidden />
           <PartyPopper className="relative size-10 text-lime-400" aria-hidden />
-          <h1 className="relative mt-4 font-display text-2xl font-bold sm:text-3xl">Rahmat! Buyurtmangiz qabul qilindi</h1>
+          <h1 className="relative mt-4 font-display text-2xl font-bold sm:text-3xl">{t.track.thanks}</h1>
           <p className="relative mt-2 max-w-xl text-ink-300">
-            Buyurtma raqami: <b className="text-lime-300">{order.number}</b>. Operatorimiz tez orada {formatPhone(order.phone)} raqamiga qo'ng'iroq qilib, buyurtmani tasdiqlaydi.
+            {t.track.numberLabel} <b className="text-lime-300">{order.number}</b>. {t.track.callText(formatPhone(order.phone))}
           </p>
         </div>
       ) : (
-        <h1 className="font-display text-2xl font-semibold">Buyurtma {order.number}</h1>
+        <h1 className="font-display text-2xl font-semibold">{t.track.order(order.number)}</h1>
       )}
 
-      <section aria-label="Buyurtma holati" className="rounded-3xl bg-white p-5 sm:p-6">
+      <section aria-label={t.track.status} className="rounded-3xl bg-white p-5 sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-ink-500">{formatDate(order.created_at, true)}</p>
-          <span className="rounded-full bg-ink-100 px-3 py-1 text-sm font-semibold">{ORDER_STATUS[order.status].label}</span>
+          <span className="rounded-full bg-ink-100 px-3 py-1 text-sm font-semibold">{t.status.order[order.status]}</span>
         </div>
         {cancelled ? (
           <div className="flex items-center gap-3 rounded-2xl bg-flame-50 p-4 text-flame-600">
             <CircleX className="size-6 shrink-0" aria-hidden />
-            <p className="text-sm font-semibold">Buyurtma bekor qilingan. Savollar bo'lsa, {store.phone} raqamiga qo'ng'iroq qiling.</p>
+            <p className="text-sm font-semibold">{t.track.cancelled(store.phone)}</p>
           </div>
         ) : (
           <ol className="grid gap-4 sm:grid-cols-4 sm:gap-2">
@@ -138,8 +140,8 @@ export function OrderTracker({ number, store }: { number: string; store: Store }
                     {done ? <Check className="size-4" aria-hidden /> : <span className="text-xs font-bold">{i + 1}</span>}
                   </span>
                   <span>
-                    <span className={`block text-sm font-semibold ${done ? "text-ink-950" : "text-ink-400"}`}>{ORDER_STEP[s].title}</span>
-                    <span className="block text-xs text-ink-500">{at(s) ? formatDate(at(s)!, true) : ORDER_STEP[s].hint}</span>
+                    <span className={`block text-sm font-semibold ${done ? "text-ink-950" : "text-ink-400"}`}>{t.status.step[s].title}</span>
+                    <span className="block text-xs text-ink-500">{at(s) ? formatDate(at(s)!, true) : t.status.step[s].hint}</span>
                   </span>
                 </li>
               );
@@ -149,7 +151,7 @@ export function OrderTracker({ number, store }: { number: string; store: Store }
       </section>
 
       <div className="grid gap-4 md:grid-cols-[1fr_320px]">
-        <section aria-label="Tovarlar" className="rounded-3xl bg-white p-5 sm:p-6">
+        <section aria-label={t.common.goods} className="rounded-3xl bg-white p-5 sm:p-6">
           <ul className="divide-y divide-ink-100">
             {order.items.map((i, idx) => (
               <li key={idx} className="flex items-center gap-3 py-3">
@@ -175,17 +177,17 @@ export function OrderTracker({ number, store }: { number: string; store: Store }
         </section>
         <aside className="space-y-4">
           <dl className="space-y-2.5 rounded-3xl bg-white p-5 text-sm">
-            <div className="flex justify-between gap-3"><dt className="text-ink-500">Qabul qilish</dt><dd className="text-right font-medium">{DELIVERY[order.delivery_method]}</dd></div>
-            {order.delivery_method === "courier" ? <div className="flex justify-between gap-3"><dt className="text-ink-500">Manzil</dt><dd className="text-right font-medium">{order.region}, {order.address}</dd></div> : null}
-            <div className="flex justify-between gap-3"><dt className="text-ink-500">To'lov</dt><dd className="text-right font-medium">{PAYMENT[order.payment_method]}{order.installment_months ? `, ${order.installment_months} oy` : ""}</dd></div>
-            <div className="flex justify-between gap-3"><dt className="text-ink-500">Yetkazish</dt><dd className="font-medium">{order.delivery_fee ? formatMoney(order.delivery_fee) : "Bepul"}</dd></div>
-            <div className="flex items-baseline justify-between border-t border-ink-100 pt-3"><dt className="font-semibold">Jami</dt><dd className="font-display text-xl font-bold">{formatMoney(order.total)}</dd></div>
-            {order.installment_monthly ? <div className="flex justify-between rounded-xl bg-lime-200 px-3 py-2"><dt className="font-semibold">Oyiga</dt><dd className="font-bold">{formatMoney(order.installment_monthly)}</dd></div> : null}
+            <div className="flex justify-between gap-3"><dt className="text-ink-500">{t.track.receive}</dt><dd className="text-right font-medium">{t.status.delivery[order.delivery_method]}</dd></div>
+            {order.delivery_method === "courier" ? <div className="flex justify-between gap-3"><dt className="text-ink-500">{t.track.address}</dt><dd className="text-right font-medium">{order.region}, {order.address}</dd></div> : null}
+            <div className="flex justify-between gap-3"><dt className="text-ink-500">{t.track.payment}</dt><dd className="text-right font-medium">{t.status.payment[order.payment_method]}{order.installment_months ? `, ${t.common.months(order.installment_months)}` : ""}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-ink-500">{t.common.delivery}</dt><dd className="font-medium">{order.delivery_fee ? formatMoney(order.delivery_fee) : t.common.free}</dd></div>
+            <div className="flex items-baseline justify-between border-t border-ink-100 pt-3"><dt className="font-semibold">{t.common.total}</dt><dd className="font-display text-xl font-bold">{formatMoney(order.total)}</dd></div>
+            {order.installment_monthly ? <div className="flex justify-between rounded-xl bg-lime-200 px-3 py-2"><dt className="font-semibold">{t.track.perMonth}</dt><dd className="font-bold">{formatMoney(order.installment_monthly)}</dd></div> : null}
           </dl>
           <a href={`tel:${tel}`} className="flex items-center gap-3 rounded-3xl bg-ink-950 p-5 text-white hover:bg-ink-800">
             <Phone className="size-5 text-lime-400" aria-hidden />
             <span>
-              <span className="block text-xs text-ink-300">Savollar bo'lsa</span>
+              <span className="block text-xs text-ink-300">{t.track.questions}</span>
               <span className="font-display font-semibold">{store.phone}</span>
             </span>
           </a>

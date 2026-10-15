@@ -1,10 +1,12 @@
 import { HeroCarousel } from "@/features/storefront/HeroCarousel";
 import { Benefits, CategoryTiles, ProductRail, PromoBanners } from "@/features/storefront/HomeSections";
-import { longestPlan } from "@/features/storefront/ProductCard";
+import { getT } from "@/shared/i18n/server";
+import { longestPlan } from "@/shared/lib/installment";
 import { getStore, serverGet } from "@/shared/lib/server";
 import type { Banner, Category, ProductList } from "@/shared/lib/types";
 
 export default async function HomePage() {
+  const t = await getT();
   const [store, banners, categories, featured, discounted, fresh] = await Promise.all([
     getStore(),
     serverGet<Banner[]>("/public/banners"),
@@ -19,14 +21,14 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8 sm:space-y-12">
-      <h1 className="sr-only">Mir — maishiy texnika va elektronika do'koni</h1>
+      <h1 className="sr-only">{t.meta.h1}</h1>
       <HeroCarousel banners={hero} />
       <CategoryTiles categories={(categories ?? []).filter((c) => c.product_count > 0)} />
-      <ProductRail title="Ommabop tovarlar" href="/katalog?featured=1" products={featured?.items ?? []} plan={plan} />
+      <ProductRail title={t.home.popular} href="/katalog?featured=1" products={featured?.items ?? []} plan={plan} />
       <Benefits store={store} />
-      <ProductRail title="Chegirmalar" accent="%" href="/katalog?discount=1&sort=discount" products={discounted?.items ?? []} plan={plan} />
+      <ProductRail title={t.home.discounts} accent="%" href="/katalog?discount=1&sort=discount" products={discounted?.items ?? []} plan={plan} />
       <PromoBanners banners={promo} />
-      <ProductRail title="Yangi kelganlar" href="/katalog?sort=new" products={fresh?.items ?? []} plan={plan} />
+      <ProductRail title={t.home.fresh} href="/katalog?sort=new" products={fresh?.items ?? []} plan={plan} />
     </div>
   );
 }

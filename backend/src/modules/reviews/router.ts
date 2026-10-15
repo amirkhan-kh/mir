@@ -3,6 +3,7 @@ import { z } from "zod";
 import { allow } from "../../core/auth.js";
 import { pool } from "../../core/db.js";
 import { idParam, notFound, pageOf, parse } from "../../core/http.js";
+import { msg } from "../../core/i18n.js";
 import { rateLimit } from "../../core/rate-limit.js";
 import * as products from "../products/repository.js";
 import * as repo from "./repository.js";
@@ -21,7 +22,7 @@ const createSchema = z.object({
 reviewsPublic.post("/", rateLimit("review", 5, 10 * 60_000), async (req, res) => {
   const input = parse(createSchema, req.body);
   const product = await products.byId(pool, input.product_id);
-  if (!product || !product.active) throw notFound("Tovar topilmadi");
+  if (!product || !product.active) throw notFound(msg("Товар не найден", "Товар табылган жок"));
   res.status(201).json(await repo.insert(pool, input));
 });
 

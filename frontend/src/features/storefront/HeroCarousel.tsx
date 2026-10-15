@@ -4,6 +4,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useT } from "@/shared/i18n/client";
 import type { Banner } from "@/shared/lib/types";
 
 const THEMES: Record<Banner["theme"], { wrap: string; title: string; sub: string; cta: string; glow: string }> = {
@@ -87,6 +88,7 @@ function Slide({ b, active, first }: { b: Banner; active: boolean; first: boolea
 }
 
 export function HeroCarousel({ banners }: { banners: Banner[] }) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = banners.length;
@@ -101,8 +103,8 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
   if (!count) return null;
   return (
     <section
-      aria-roledescription="karusel"
-      aria-label="Aksiyalar"
+      aria-roledescription={t.hero.carousel}
+      aria-label={t.hero.label}
       className="relative"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -112,7 +114,7 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
       <div className="overflow-hidden rounded-3xl">
         <ul className="flex h-[440px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] sm:h-[400px]" style={{ transform: `translateX(-${index * 100}%)` }}>
           {banners.map((b, i) => (
-            <li key={b.id} className="h-full w-full shrink-0" aria-roledescription="slayd" aria-label={`${i + 1} / ${count}`} aria-hidden={i !== index}>
+            <li key={b.id} className="h-full w-full shrink-0" aria-roledescription={t.hero.slide} aria-label={`${i + 1} / ${count}`} aria-hidden={i !== index}>
               <Slide b={b} active={i === index} first={i === 0} />
             </li>
           ))}
@@ -120,10 +122,10 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
       </div>
       {count > 1 ? (
         <>
-          <button type="button" aria-label="Oldingi slayd" onClick={() => go(index - 1)} className="absolute left-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink-900 shadow-card backdrop-blur hover:bg-white md:grid">
+          <button type="button" aria-label={t.hero.prev} onClick={() => go(index - 1)} className="absolute left-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink-900 shadow-card backdrop-blur hover:bg-white md:grid">
             <ChevronLeft className="size-5" />
           </button>
-          <button type="button" aria-label="Keyingi slayd" onClick={() => go(index + 1)} className="absolute right-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink-900 shadow-card backdrop-blur hover:bg-white md:grid">
+          <button type="button" aria-label={t.hero.next} onClick={() => go(index + 1)} className="absolute right-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink-900 shadow-card backdrop-blur hover:bg-white md:grid">
             <ChevronRight className="size-5" />
           </button>
           <div className="absolute bottom-4 left-6 flex gap-1.5 sm:left-10">
@@ -131,7 +133,7 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
               <button
                 key={b.id}
                 type="button"
-                aria-label={`${i + 1}-slayd`}
+                aria-label={t.hero.goTo(i + 1)}
                 aria-current={i === index}
                 onClick={() => go(i)}
                 className={`h-2 rounded-full transition-all ${i === index ? "w-8 bg-lime-400" : "w-2 bg-ink-400/60 hover:bg-ink-400"}`}

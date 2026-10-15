@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { api, ApiError } from "@/shared/lib/api";
+import { useT } from "@/shared/i18n/client";
 import { formatMoney } from "@/shared/lib/format";
 import type { Category } from "@/shared/lib/types";
 import { useApi } from "@/shared/lib/useApi";
@@ -33,6 +34,8 @@ interface Row {
 }
 
 export function ProductsList() {
+  const t = useT();
+  const tr = t.admin.products;
   const [category, setCategory] = useState("");
   const { data: categories } = useApi<Category[]>("/categories");
   const list = usePaged<{ items: Row[]; total: number; counts: Record<string, number> }>("/products", { extra: { category_id: category } });
@@ -40,25 +43,25 @@ export function ProductsList() {
   const c = list.data?.counts ?? {};
 
   const remove = async (row: Row) => {
-    if (!confirm(`"${row.name}" tovarini o'chirasizmi? Buyurtmalar tarixida nomi saqlanib qoladi.`)) return;
+    if (!confirm(tr.removeConfirm(row.name))) return;
     setError(null);
     try {
       await api(`/products/${row.id}`, { method: "DELETE" });
       list.reload();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Xatolik");
+      setError(err instanceof ApiError ? err.message : t.common.error);
     }
   };
 
   return (
     <div>
       <PageHeader
-        title="Tovarlar"
-        subtitle="Narx, qoldiq, rasmlar va saytdagi ko'rinishni boshqaring"
+        title={tr.title}
+        subtitle={tr.subtitle}
         action={
           <ButtonLink href="/admin/tovarlar/yangi">
             <Plus className="size-4.5" aria-hidden />
-            Yangi tovar
+            {tr.new}
           </ButtonLink>
         }
       />
@@ -67,24 +70,24 @@ export function ProductsList() {
           value={list.status}
           onChange={list.setStatus}
           options={[
-            { value: "", label: "Barchasi", count: c.all },
-            { value: "active", label: "Sotuvda", count: c.active },
-            { value: "inactive", label: "Yashirin", count: c.inactive },
-            { value: "low", label: "Kam qolgan", count: c.low },
-            { value: "out", label: "Tugagan", count: c.out },
-            { value: "featured", label: "Ommabop", count: c.featured },
+            { value: "", label: t.common.all, count: c.all },
+            { value: "active", label: tr.chips.active, count: c.active },
+            { value: "inactive", label: tr.chips.inactive, count: c.inactive },
+            { value: "low", label: tr.chips.low, count: c.low },
+            { value: "out", label: tr.chips.out, count: c.out },
+            { value: "featured", label: tr.chips.featured, count: c.featured },
           ]}
         />
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Select aria-label="Kategoriya" value={category} onChange={(e) => setCategory(e.target.value)} className="h-10 sm:w-52">
-            <option value="">Barcha kategoriyalar</option>
+          <Select aria-label={tr.category} value={category} onChange={(e) => setCategory(e.target.value)} className="h-10 sm:w-52">
+            <option value="">{tr.allCategories}</option>
             {(categories ?? []).map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
           </Select>
-          <SearchInput value={list.q} onChange={list.setQ} label="Nomi, SKU yoki brend" />
+          <SearchInput value={list.q} onChange={list.setQ} label={tr.search} />
         </div>
       </div>
       {error ? <div className="mb-3"><Alert>{error}</Alert></div> : null}
@@ -94,10 +97,10 @@ export function ProductsList() {
         ) : !list.data ? (
           <Loading />
         ) : !list.data.items.length ? (
-          <Empty title="Tovar topilmadi" action={<ButtonLink href="/admin/tovarlar/yangi" size="sm">Tovar qo'shish</ButtonLink>} />
+          <Empty title={tr.empty} action={<ButtonLink href="/admin/tovarlar/yangi" size="sm">{tr.add}</ButtonLink>} />
         ) : (
           <>
-            <Table head={["Tovar", "Kategoriya", "Narx", "Qoldiq", "Holat", ""]}>
+            <Table head={tr.head}>
               {list.data.items.map((p) => (
                 <tr key={p.id} className="hover:bg-ink-50">
                   <td className="px-4 py-3">
@@ -108,7 +111,7 @@ export function ProductsList() {
                       <span className="min-w-0">
                         <span className="line-clamp-1 font-semibold hover:text-leaf-700">{p.name}</span>
                         <span className="text-xs text-ink-500">
-                          {p.sku ?? "SKU yo'q"}
+                          {p.sku ?? tr.noSku}
                           {p.brand ? ` · ${p.brand}` : ""}
                         </span>
                       </span>
@@ -120,27 +123,27 @@ export function ProductsList() {
                     {p.old_price ? <p className="text-xs text-ink-400 line-through">{formatMoney(p.old_price)}</p> : null}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge tone={p.stock === 0 ? "flame" : p.stock <= 3 ? "amber" : "leaf"}>{p.stock} dona</Badge>
+                    <Badge tone={p.stock === 0 ? "flame" : p.stock <= 3 ? "amber" : "leaf"}>{t.common.pcs(p.stock)}</Badge>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
-                      <Badge tone={p.active ? "leaf" : "muted"}>{p.active ? "Sotuvda" : "Yashirin"}</Badge>
+                      <Badge tone={p.active ? "leaf" : "muted"}>{p.active ? tr.onSale : tr.hidden}</Badge>
                       {p.is_featured ? (
                         <Badge tone="lime">
-                          <Star className="size-3" aria-hidden /> Ommabop
+                          <Star className="size-3" aria-hidden /> {tr.featured}
                         </Badge>
                       ) : null}
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
-                      <a href={`/mahsulot/${p.slug}`} target="_blank" rel="noreferrer" aria-label={`${p.name} — saytda ko'rish`} className="grid size-9 place-items-center rounded-xl text-ink-500 hover:bg-ink-100">
+                      <a href={`/mahsulot/${p.slug}`} target="_blank" rel="noreferrer" aria-label={tr.view(p.name)} className="grid size-9 place-items-center rounded-xl text-ink-500 hover:bg-ink-100">
                         <ExternalLink className="size-4" />
                       </a>
-                      <Link href={`/admin/tovarlar/${p.id}`} aria-label={`${p.name} — tahrirlash`} className="grid size-9 place-items-center rounded-xl text-ink-500 hover:bg-ink-100">
+                      <Link href={`/admin/tovarlar/${p.id}`} aria-label={tr.edit(p.name)} className="grid size-9 place-items-center rounded-xl text-ink-500 hover:bg-ink-100">
                         <Pencil className="size-4" />
                       </Link>
-                      <IconButton label={`${p.name} — o'chirish`} onClick={() => remove(p)} className="hover:!bg-flame-50 hover:!text-flame-600">
+                      <IconButton label={tr.remove(p.name)} onClick={() => remove(p)} className="hover:!bg-flame-50 hover:!text-flame-600">
                         <Trash2 className="size-4" />
                       </IconButton>
                     </div>

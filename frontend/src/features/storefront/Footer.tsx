@@ -1,9 +1,11 @@
 import { Clock, MapPin, Phone, Send } from "lucide-react";
 import Link from "next/link";
+import { getT } from "@/shared/i18n/server";
 import type { Category, Store } from "@/shared/lib/types";
 import { Logo } from "@/shared/ui/Logo";
 
-export function Footer({ store, categories }: { store: Store; categories: Category[] }) {
+export async function Footer({ store, categories }: { store: Store; categories: Category[] }) {
+  const t = await getT();
   const tel = (p: string) => `tel:${p.replace(/[^\d+]/g, "")}`;
   return (
     <footer className="relative mt-10 overflow-hidden bg-ink-950 text-ink-300">
@@ -11,10 +13,10 @@ export function Footer({ store, categories }: { store: Store; categories: Catego
       <div className="relative mx-auto grid max-w-[1320px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4">
           <Logo inverted />
-          <p className="max-w-xs text-sm leading-relaxed">{store.tagline}. Rasmiy kafolat, muddatli to'lov va o'z kuryerlarimiz orqali yetkazib berish.</p>
+          <p className="max-w-xs text-sm leading-relaxed">{t.footer.about(store.tagline)}</p>
         </div>
         <div>
-          <h2 className="mb-4 font-display text-sm font-semibold text-white">Katalog</h2>
+          <h2 className="mb-4 font-display text-sm font-semibold text-white">{t.footer.catalog}</h2>
           <ul className="space-y-2 text-sm">
             {categories.slice(0, 6).map((c) => (
               <li key={c.id}>
@@ -26,16 +28,16 @@ export function Footer({ store, categories }: { store: Store; categories: Catego
           </ul>
         </div>
         <div>
-          <h2 className="mb-4 font-display text-sm font-semibold text-white">Xaridorlarga</h2>
+          <h2 className="mb-4 font-display text-sm font-semibold text-white">{t.footer.customers}</h2>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/kuzatish" className="hover:text-lime-300">Buyurtmani kuzatish</Link></li>
-            <li><Link href="/savat" className="hover:text-lime-300">Savat</Link></li>
-            <li><Link href="/sevimlilar" className="hover:text-lime-300">Sevimlilar</Link></li>
-            <li><Link href="/katalog?discount=1" className="hover:text-lime-300">Chegirmalar</Link></li>
+            <li><Link href="/kuzatish" className="hover:text-lime-300">{t.footer.track}</Link></li>
+            <li><Link href="/savat" className="hover:text-lime-300">{t.nav.cart}</Link></li>
+            <li><Link href="/sevimlilar" className="hover:text-lime-300">{t.nav.favorites}</Link></li>
+            <li><Link href="/katalog?discount=1" className="hover:text-lime-300">{t.nav.discounts}</Link></li>
           </ul>
         </div>
         <div>
-          <h2 className="mb-4 font-display text-sm font-semibold text-white">Aloqa</h2>
+          <h2 className="mb-4 font-display text-sm font-semibold text-white">{t.footer.contacts}</h2>
           <ul className="space-y-3 text-sm">
             <li>
               <a href={tel(store.phone)} className="flex items-center gap-2 font-display text-lg font-semibold text-white hover:text-lime-300">
@@ -69,7 +71,7 @@ export function Footer({ store, categories }: { store: Store; categories: Catego
       </div>
       <div className="relative border-t border-white/10">
         <p className="mx-auto max-w-[1320px] px-4 py-5 text-xs text-ink-400 sm:px-6">
-          © {new Date().getFullYear()} {store.store_name}. Barcha huquqlar himoyalangan.
+          © {new Date().getFullYear()} {store.store_name}. {t.footer.rights}
         </p>
       </div>
     </footer>

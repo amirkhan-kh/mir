@@ -3,16 +3,10 @@
 import { SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/shared/i18n/client";
 import { formatNumber } from "@/shared/lib/format";
 
-export const SORT_OPTIONS = [
-  { value: "popular", label: "Ommabop" },
-  { value: "new", label: "Yangilari" },
-  { value: "cheap", label: "Arzonroq" },
-  { value: "expensive", label: "Qimmatroq" },
-  { value: "rating", label: "Reyting bo'yicha" },
-  { value: "discount", label: "Chegirma bo'yicha" },
-];
+const SORTS = ["popular", "new", "cheap", "expensive", "rating", "discount"] as const;
 
 function useUpdate() {
   const router = useRouter();
@@ -30,18 +24,19 @@ function useUpdate() {
 
 export function SortSelect() {
   const { params, update } = useUpdate();
+  const t = useT();
   return (
     <label className="flex items-center gap-2 text-sm text-ink-600">
-      <span className="hidden sm:inline">Saralash:</span>
+      <span className="hidden sm:inline">{t.catalog.sortLabel}</span>
       <select
-        aria-label="Saralash"
+        aria-label={t.catalog.sortLabel}
         value={params.get("sort") ?? "popular"}
         onChange={(e) => update({ sort: e.target.value === "popular" ? null : e.target.value })}
         className="h-10 rounded-xl border border-ink-200 bg-white px-3 text-sm font-semibold text-ink-900 focus:border-leaf-600 focus:outline-none"
       >
-        {SORT_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
+        {SORTS.map((s) => (
+          <option key={s} value={s}>
+            {t.catalog.sort[s]}
           </option>
         ))}
       </select>
@@ -56,6 +51,7 @@ interface Facets {
 
 function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void }) {
   const { params, update, pending } = useUpdate();
+  const t = useT();
   const brands = (params.get("brand") ?? "").split(",").filter(Boolean);
   const [min, setMin] = useState(params.get("min") ?? "");
   const [max, setMax] = useState(params.get("max") ?? "");
@@ -86,8 +82,8 @@ function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void })
   return (
     <div className={`space-y-6 ${pending ? "opacity-60" : ""}`}>
       <div className="space-y-1">
-        {flag("in_stock", "Faqat sotuvda borlari")}
-        {flag("discount", "Chegirmadagilar")}
+        {flag("in_stock", t.catalog.inStock)}
+        {flag("discount", t.catalog.withDiscount)}
       </div>
       <form
         className="space-y-3"
@@ -97,18 +93,18 @@ function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void })
           onDone?.();
         }}
       >
-        <h3 className="text-sm font-semibold text-ink-950">Narx, so'm</h3>
+        <h3 className="text-sm font-semibold text-ink-950">{t.catalog.price}</h3>
         <div className="grid grid-cols-2 gap-2">
-          <input type="number" inputMode="numeric" min={0} aria-label="Eng kam narx" placeholder={`${formatNumber(facets.price.min)} dan`} value={min} onChange={(e) => setMin(e.target.value)} className="h-10 w-full rounded-xl border border-ink-200 bg-white px-3 text-sm focus:border-leaf-600 focus:outline-none" />
-          <input type="number" inputMode="numeric" min={0} aria-label="Eng ko'p narx" placeholder={`${formatNumber(facets.price.max)} gacha`} value={max} onChange={(e) => setMax(e.target.value)} className="h-10 w-full rounded-xl border border-ink-200 bg-white px-3 text-sm focus:border-leaf-600 focus:outline-none" />
+          <input type="number" inputMode="numeric" min={0} aria-label={t.catalog.min} placeholder={t.catalog.from(formatNumber(facets.price.min))} value={min} onChange={(e) => setMin(e.target.value)} className="h-10 w-full rounded-xl border border-ink-200 bg-white px-3 text-sm focus:border-leaf-600 focus:outline-none" />
+          <input type="number" inputMode="numeric" min={0} aria-label={t.catalog.max} placeholder={t.catalog.to(formatNumber(facets.price.max))} value={max} onChange={(e) => setMax(e.target.value)} className="h-10 w-full rounded-xl border border-ink-200 bg-white px-3 text-sm focus:border-leaf-600 focus:outline-none" />
         </div>
         <button type="submit" className="h-10 w-full rounded-xl bg-ink-950 text-sm font-semibold text-white hover:bg-ink-800">
-          Narxni qo'llash
+          {t.catalog.applyPrice}
         </button>
       </form>
       {facets.brands.length ? (
         <fieldset className="space-y-2">
-          <legend className="mb-2 text-sm font-semibold text-ink-950">Brend</legend>
+          <legend className="mb-2 text-sm font-semibold text-ink-950">{t.catalog.brand}</legend>
           {facets.brands.map((b) => (
             <label key={b.name} className="flex cursor-pointer items-center gap-2.5 text-sm text-ink-800">
               <input type="checkbox" checked={brands.includes(b.name)} onChange={() => toggleBrand(b.name)} className="size-4.5 rounded accent-leaf-600" />
@@ -127,7 +123,7 @@ function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void })
           }}
           className="text-sm font-semibold text-flame-600 hover:underline"
         >
-          Filtrlarni tozalash
+          {t.catalog.clear}
         </button>
       ) : null}
     </div>
@@ -135,9 +131,10 @@ function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void })
 }
 
 export function CatalogFilters({ facets }: { facets: Facets }) {
+  const t = useT();
   return (
-    <aside aria-label="Filtrlar" className="hidden w-64 shrink-0 lg:block">
-      <div className="sticky top-40 rounded-2xl bg-white p-5">
+    <aside aria-label={t.catalog.filters} className="hidden w-64 shrink-0 lg:block">
+      <div className="sticky top-6 rounded-2xl bg-white p-5">
         <FilterBody facets={facets} />
       </div>
     </aside>
@@ -146,19 +143,20 @@ export function CatalogFilters({ facets }: { facets: Facets }) {
 
 export function MobileFilters({ facets }: { facets: Facets }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="flex h-10 items-center gap-2 rounded-xl bg-white px-3.5 text-sm font-semibold text-ink-900 ring-1 ring-ink-200 lg:hidden">
         <SlidersHorizontal className="size-4" aria-hidden />
-        Filtrlar
+        {t.catalog.filters}
       </button>
       {open ? (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Filtrlar">
-          <button type="button" aria-label="Yopish" className="absolute inset-0 bg-ink-950/50" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t.catalog.filters}>
+          <button type="button" aria-label={t.common.close} className="absolute inset-0 bg-ink-950/50" onClick={() => setOpen(false)} />
           <div className="absolute inset-x-0 bottom-0 max-h-[85vh] animate-fade-up overflow-y-auto rounded-t-3xl bg-white p-5 pb-10">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Filtrlar</h2>
-              <button type="button" aria-label="Filtrlarni yopish" onClick={() => setOpen(false)} className="grid size-9 place-items-center rounded-xl hover:bg-ink-100">
+              <h2 className="font-display text-lg font-semibold">{t.catalog.filters}</h2>
+              <button type="button" aria-label={t.catalog.closeFilters} onClick={() => setOpen(false)} className="grid size-9 place-items-center rounded-xl hover:bg-ink-100">
                 <X className="size-5" />
               </button>
             </div>

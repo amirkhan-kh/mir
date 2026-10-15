@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { HttpError } from "./http.js";
+import { msg } from "./i18n.js";
 
 /** In-memory fixed-window limiter per IP (single API process). */
 export function rateLimit(name: string, max: number, windowMs: number) {
@@ -14,7 +15,7 @@ export function rateLimit(name: string, max: number, windowMs: number) {
       return next();
     }
     if (entry.count >= max) {
-      throw new HttpError(429, "Juda ko'p so'rov. Birozdan so'ng qayta urinib ko'ring");
+      throw new HttpError(429, msg("Слишком много запросов. Попробуйте чуть позже", "Сурамдар өтө көп. Бир аздан кийин кайра аракет кылыңыз"));
     }
     entry.count += 1;
     next();

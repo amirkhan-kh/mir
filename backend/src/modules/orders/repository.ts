@@ -1,4 +1,5 @@
 import type { Db } from "../../core/db.js";
+import { col, type Lang } from "../../core/i18n.js";
 
 export interface OrderRow {
   idempotency_key: string | null;
@@ -35,9 +36,9 @@ export async function lockProducts(db: Db, ids: number[]) {
   return rows;
 }
 
-export async function readProducts(db: Db, ids: number[]) {
+export async function readProducts(db: Db, ids: number[], lang: Lang) {
   const { rows } = await db.query(
-    `SELECT p.id, p.name, p.slug, p.price, p.old_price, p.stock, p.images[1] AS image, p.active AND c.active AS available
+    `SELECT p.id, ${col(lang, "p.name")}, p.slug, p.price, p.old_price, p.stock, p.images[1] AS image, p.active AND c.active AS available
        FROM products p JOIN categories c ON c.id = p.category_id WHERE p.id = ANY($1)`,
     [ids],
   );

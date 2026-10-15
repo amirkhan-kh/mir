@@ -4,6 +4,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { api, ApiError } from "@/shared/lib/api";
+import { useT } from "@/shared/i18n/client";
 import type { Banner } from "@/shared/lib/types";
 import { useApi } from "@/shared/lib/useApi";
 import { Badge } from "@/shared/ui/Badge";
@@ -14,21 +15,21 @@ import { PageHeader } from "@/shared/ui/Page";
 import { Alert, Empty, ErrorState, Loading } from "@/shared/ui/States";
 import { ImageUploader } from "../ImageUploader";
 
-const THEME: Record<Banner["theme"], { label: string; cls: string; sub: string }> = {
-  dark: { label: "Qora", cls: "bg-ink-950 text-white", sub: "text-ink-300" },
-  lime: { label: "Yashil (brend)", cls: "brand-gradient text-ink-950", sub: "text-ink-800" },
-  light: { label: "Oq", cls: "bg-white text-ink-950 ring-1 ring-ink-100", sub: "text-ink-600" },
+const THEME: Record<Banner["theme"], { cls: string; sub: string }> = {
+  dark: { cls: "bg-ink-950 text-white", sub: "text-ink-300" },
+  lime: { cls: "brand-gradient text-ink-950", sub: "text-ink-800" },
+  light: { cls: "bg-white text-ink-950 ring-1 ring-ink-100", sub: "text-ink-600" },
 };
 
 type Draft = Omit<Banner, "id">;
-const EMPTY: Draft = { title: "", subtitle: "", image: null, link: "", cta: "Batafsil", theme: "dark", placement: "hero", sort: 0, active: true };
 
 function Preview({ b }: { b: Draft }) {
+  const heading = useT().admin.banners.headingPlaceholder;
   const t = THEME[b.theme];
   return (
     <div className={`relative flex overflow-hidden rounded-2xl p-5 ${b.placement === "hero" ? "h-44" : "h-32"} ${t.cls}`}>
       <div className="relative z-10 max-w-[58%]">
-        <p className="font-display text-base font-bold leading-tight">{b.title || "Sarlavha"}</p>
+        <p className="font-display text-base font-bold leading-tight">{b.title || heading}</p>
         {b.subtitle ? <p className={`mt-1 line-clamp-2 text-xs ${t.sub}`}>{b.subtitle}</p> : null}
         {b.cta ? <p className="mt-2 text-xs font-semibold">{b.cta} →</p> : null}
       </div>
@@ -42,7 +43,11 @@ function Preview({ b }: { b: Draft }) {
 }
 
 function BannerForm({ initial, onSaved }: { initial: Banner | null; onSaved: () => void }) {
-  const [b, setB] = useState<Draft>(initial ?? EMPTY);
+  const dict = useT();
+  const tr = dict.admin.banners;
+  const [b, setB] = useState<Draft>(
+    initial ?? { title: "", title_ky: "", subtitle: "", subtitle_ky: "", image: null, link: "", cta: tr.ctaDefault, cta_ky: tr.ctaDefaultKy, theme: "dark", placement: "hero", sort: 0, active: true },
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setB((s) => ({ ...s, [k]: v }));
@@ -59,49 +64,56 @@ function BannerForm({ initial, onSaved }: { initial: Banner | null; onSaved: () 
           else await api("/banners", { method: "POST", json: b });
           onSaved();
         } catch (err) {
-          setError(err instanceof ApiError ? err.message : "Xatolik");
+          setError(err instanceof ApiError ? err.message : dict.common.error);
           setSaving(false);
         }
       }}
     >
       <div className="space-y-4">
-        <Field label="Sarlavha">{(id) => <Input id={id} required minLength={2} maxLength={120} value={b.title} onChange={(e) => set("title", e.target.value)} />}</Field>
-        <Field label="Matn">{(id) => <Input id={id} maxLength={240} value={b.subtitle} onChange={(e) => set("subtitle", e.target.value)} />}</Field>
+        <Field label={tr.heading}>{(id) => <Input id={id} required minLength={2} maxLength={120} value={b.title} onChange={(e) => set("title", e.target.value)} />}</Field>
+        <Field label={tr.text}>{(id) => <Input id={id} maxLength={240} value={b.subtitle} onChange={(e) => set("subtitle", e.target.value)} />}</Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Havola" hint="/katalog/audio yoki https://…">
+          <Field label={tr.link} hint={tr.linkHint}>
             {(id) => <Input id={id} maxLength={300} value={b.link ?? ""} onChange={(e) => set("link", e.target.value)} placeholder="/katalog?discount=1" />}
           </Field>
-          <Field label="Tugma matni">{(id) => <Input id={id} maxLength={40} value={b.cta ?? ""} onChange={(e) => set("cta", e.target.value)} />}</Field>
-          <Field label="Joylashuv">
+          <Field label={tr.cta}>{(id) => <Input id={id} maxLength={40} value={b.cta ?? ""} onChange={(e) => set("cta", e.target.value)} />}</Field>
+          <Field label={tr.placement}>
             {(id) => (
               <Select id={id} value={b.placement} onChange={(e) => set("placement", e.target.value as Banner["placement"])}>
-                <option value="hero">Asosiy karusel (katta)</option>
-                <option value="promo">Promo blok (kichik)</option>
+                <option value="hero">{tr.hero}</option>
+                <option value="promo">{tr.promo}</option>
               </Select>
             )}
           </Field>
-          <Field label="Rang">
+          <Field label={tr.theme}>
             {(id) => (
               <Select id={id} value={b.theme} onChange={(e) => set("theme", e.target.value as Banner["theme"])}>
-                {Object.entries(THEME).map(([k, v]) => (
+                {(Object.keys(THEME) as Banner["theme"][]).map((k) => (
                   <option key={k} value={k}>
-                    {v.label}
+                    {tr.themes[k]}
                   </option>
                 ))}
               </Select>
             )}
           </Field>
-          <Field label="Tartib">{(id) => <Input id={id} type="number" min={0} max={10000} value={b.sort} onChange={(e) => set("sort", Number(e.target.value))} />}</Field>
+          <Field label={tr.sort}>{(id) => <Input id={id} type="number" min={0} max={10000} value={b.sort} onChange={(e) => set("sort", Number(e.target.value))} />}</Field>
         </div>
-        <ImageUploader label="Rasm" max={1} value={b.image ? [b.image] : []} onChange={(v) => set("image", v[0] ?? null)} />
-        <Checkbox label="Faol" hint="O'chirilsa, banner saytda ko'rinmaydi" checked={b.active} onChange={(e) => set("active", e.target.checked)} />
+        <fieldset className="space-y-4 rounded-2xl bg-ink-50 p-4">
+          <legend className="px-1 text-sm font-semibold text-ink-800">{tr.kyTitle}</legend>
+          <p className="-mt-2 text-xs text-ink-500">{dict.admin.kyHint}</p>
+          <Field label={tr.headingKy}>{(id) => <Input id={id} lang="ky" maxLength={120} value={b.title_ky ?? ""} onChange={(e) => set("title_ky", e.target.value)} />}</Field>
+          <Field label={tr.textKy}>{(id) => <Input id={id} lang="ky" maxLength={240} value={b.subtitle_ky ?? ""} onChange={(e) => set("subtitle_ky", e.target.value)} />}</Field>
+          <Field label={tr.ctaKy}>{(id) => <Input id={id} lang="ky" maxLength={40} value={b.cta_ky ?? ""} onChange={(e) => set("cta_ky", e.target.value)} />}</Field>
+        </fieldset>
+        <ImageUploader label={tr.image} max={1} value={b.image ? [b.image] : []} onChange={(v) => set("image", v[0] ?? null)} />
+        <Checkbox label={tr.active} hint={tr.activeHint} checked={b.active} onChange={(e) => set("active", e.target.checked)} />
         {error ? <Alert>{error}</Alert> : null}
         <Button type="submit" className="w-full" disabled={saving}>
-          {saving ? "Saqlanmoqda…" : "Saqlash"}
+          {saving ? dict.common.saving : dict.common.save}
         </Button>
       </div>
       <div>
-        <p className="mb-2 text-sm font-semibold text-ink-600">Ko'rinishi</p>
+        <p className="mb-2 text-sm font-semibold text-ink-600">{tr.preview}</p>
         <Preview b={b} />
       </div>
     </form>
@@ -109,33 +121,35 @@ function BannerForm({ initial, onSaved }: { initial: Banner | null; onSaved: () 
 }
 
 export function BannersAdmin() {
+  const t = useT();
+  const tr = t.admin.banners;
   const { data, error, reload } = useApi<Banner[]>("/banners");
   const [edit, setEdit] = useState<Banner | null | "new">(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const remove = async (b: Banner) => {
-    if (!confirm(`"${b.title}" bannerini o'chirasizmi?`)) return;
+    if (!confirm(tr.removeConfirm(b.title))) return;
     try {
       await api(`/banners/${b.id}`, { method: "DELETE" });
       reload();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Xatolik");
+      setActionError(err instanceof ApiError ? err.message : t.common.error);
     }
   };
 
   const groups: { key: Banner["placement"]; title: string }[] = [
-    { key: "hero", title: "Asosiy karusel" },
-    { key: "promo", title: "Promo bloklar" },
+    { key: "hero", title: tr.groups.hero },
+    { key: "promo", title: tr.groups.promo },
   ];
 
   return (
     <div>
       <PageHeader
-        title="Bannerlar"
-        subtitle="Bosh sahifadagi aksiyalar va reklama bloklari"
+        title={tr.title}
+        subtitle={tr.subtitle}
         action={
           <Button onClick={() => setEdit("new")}>
-            <Plus className="size-4.5" aria-hidden /> Yangi banner
+            <Plus className="size-4.5" aria-hidden /> {tr.new}
           </Button>
         }
       />
@@ -145,7 +159,7 @@ export function BannersAdmin() {
       ) : !data ? (
         <Loading />
       ) : !data.length ? (
-        <Empty title="Banner yo'q" hint="Birinchi bannerni qo'shing — u bosh sahifada chiqadi." />
+        <Empty title={tr.empty} hint={tr.emptyHint} />
       ) : (
         <div className="space-y-8">
           {groups.map((g) => (
@@ -161,13 +175,13 @@ export function BannersAdmin() {
                       </div>
                       <div className="mt-3 flex items-center justify-between gap-2 px-1">
                         <span className="flex items-center gap-2 text-xs text-ink-500">
-                          <Badge tone={b.active ? "leaf" : "muted"}>{b.active ? "Faol" : "O'chiq"}</Badge>#{b.sort}
+                          <Badge tone={b.active ? "leaf" : "muted"}>{b.active ? tr.active : tr.off}</Badge>#{b.sort}
                         </span>
                         <span className="flex gap-1">
-                          <IconButton label={`${b.title} — tahrirlash`} onClick={() => setEdit(b)}>
+                          <IconButton label={tr.editLabel(b.title)} onClick={() => setEdit(b)}>
                             <Pencil className="size-4" />
                           </IconButton>
-                          <IconButton label={`${b.title} — o'chirish`} onClick={() => remove(b)} className="hover:!bg-flame-50 hover:!text-flame-600">
+                          <IconButton label={tr.removeLabel(b.title)} onClick={() => remove(b)} className="hover:!bg-flame-50 hover:!text-flame-600">
                             <Trash2 className="size-4" />
                           </IconButton>
                         </span>
@@ -179,7 +193,7 @@ export function BannersAdmin() {
           ))}
         </div>
       )}
-      <Modal size="lg" open={edit !== null} title={edit === "new" ? "Yangi banner" : "Bannerni tahrirlash"} onClose={() => setEdit(null)}>
+      <Modal size="lg" open={edit !== null} title={edit === "new" ? tr.new : tr.edit} onClose={() => setEdit(null)}>
         {edit !== null ? (
           <BannerForm
             key={edit === "new" ? "new" : edit.id}

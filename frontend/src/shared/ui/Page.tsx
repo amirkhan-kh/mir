@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import type { ReactNode } from "react";
+import { useT } from "@/shared/i18n/client";
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: ReactNode; action?: ReactNode }) {
   return (
@@ -33,7 +34,9 @@ export function KpiCard({ label, value, hint, icon, accent = false }: { label: s
   );
 }
 
-export function SearchInput({ value, onChange, label = "Qidirish" }: { value: string; onChange: (v: string) => void; label?: string }) {
+export function SearchInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+  const t = useT();
+  label ??= t.common.search;
   return (
     <label className="relative block w-full sm:w-72">
       <span className="sr-only">{label}</span>
@@ -58,8 +61,9 @@ export function Chips({
   onChange: (v: string) => void;
   options: { value: string; label: string; count?: number }[];
 }) {
+  const t = useT();
   return (
-    <div className="scrollbar-none -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="group" aria-label="Filtr">
+    <div className="scrollbar-none -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="group" aria-label={t.common.filter}>
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -84,20 +88,21 @@ export function Chips({
 }
 
 export function Pagination({ page, total, limit, onPage }: { page: number; total: number; limit: number; onPage: (p: number) => void }) {
+  const t = useT();
   const pages = Math.max(1, Math.ceil(total / limit));
   return (
     <div className="flex items-center justify-between gap-3 border-t border-ink-100 px-4 py-3 text-sm text-ink-600">
       <span>
-        Jami: <b className="text-ink-900">{total}</b>
+        {t.common.totalLabel} <b className="text-ink-900">{total}</b>
       </span>
       <div className="flex items-center gap-2">
-        <button type="button" aria-label="Oldingi sahifa" disabled={page <= 1} onClick={() => onPage(page - 1)} className="grid size-9 place-items-center rounded-xl ring-1 ring-ink-200 hover:bg-ink-50 disabled:opacity-40">
+        <button type="button" aria-label={t.common.prevPage} disabled={page <= 1} onClick={() => onPage(page - 1)} className="grid size-9 place-items-center rounded-xl ring-1 ring-ink-200 hover:bg-ink-50 disabled:opacity-40">
           <ChevronLeft className="size-4" />
         </button>
         <span className="tabular-nums">
           {page} / {pages}
         </span>
-        <button type="button" aria-label="Keyingi sahifa" disabled={page >= pages} onClick={() => onPage(page + 1)} className="grid size-9 place-items-center rounded-xl ring-1 ring-ink-200 hover:bg-ink-50 disabled:opacity-40">
+        <button type="button" aria-label={t.common.nextPage} disabled={page >= pages} onClick={() => onPage(page + 1)} className="grid size-9 place-items-center rounded-xl ring-1 ring-ink-200 hover:bg-ink-50 disabled:opacity-40">
           <ChevronRight className="size-4" />
         </button>
       </div>

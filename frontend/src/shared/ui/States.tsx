@@ -1,11 +1,15 @@
+"use client";
+
 import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useT } from "@/shared/i18n/client";
 
-export function Loading({ label = "Yuklanmoqda…" }: { label?: string }) {
+export function Loading({ label }: { label?: string }) {
+  const t = useT();
   return (
     <div role="status" className="flex items-center justify-center gap-2 py-16 text-sm text-ink-500">
       <Loader2 className="size-4 animate-spin" aria-hidden />
-      {label}
+      {label ?? t.common.loading}
     </div>
   );
 }
@@ -22,6 +26,7 @@ export function Empty({ title, hint, action, icon }: { title: string; hint?: str
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const t = useT();
   return (
     <div role="alert" className="flex flex-col items-center gap-3 px-6 py-14 text-center">
       <div className="grid size-12 place-items-center rounded-2xl bg-flame-50 text-flame-600">
@@ -30,7 +35,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
       <p className="text-sm text-ink-700">{message}</p>
       {onRetry ? (
         <button type="button" onClick={onRetry} className="text-sm font-semibold text-leaf-700 underline-offset-4 hover:underline">
-          Qayta urinish
+          {t.common.retry}
         </button>
       ) : null}
     </div>

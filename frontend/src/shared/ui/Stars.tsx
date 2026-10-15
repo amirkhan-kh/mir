@@ -1,8 +1,12 @@
+"use client";
+
 import { Star } from "lucide-react";
+import { useT } from "@/shared/i18n/client";
 
 export function Stars({ value, size = "size-4" }: { value: number; size?: string }) {
+  const t = useT();
   return (
-    <span className="inline-flex items-center gap-0.5" role="img" aria-label={`Reyting ${value.toFixed(1)} / 5`}>
+    <span className="inline-flex items-center gap-0.5" role="img" aria-label={t.reviews.rating(value.toFixed(1))}>
       {[1, 2, 3, 4, 5].map((i) => {
         const fill = Math.max(0, Math.min(1, value - i + 1));
         return (

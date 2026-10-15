@@ -8,6 +8,7 @@ import { requireAuth } from "./core/auth.js";
 import { config } from "./core/config.js";
 import { pool } from "./core/db.js";
 import { errorHandler, notFound } from "./core/http.js";
+import { msg } from "./core/i18n.js";
 import { authRouter } from "./modules/auth/router.js";
 import { bannersPublic, bannersRouter } from "./modules/banners/router.js";
 import { categoriesPublic, categoriesRouter } from "./modules/categories/router.js";
@@ -62,6 +63,6 @@ api.use("/uploads", uploadsRouter);
 
 app.use("/api/v1", api);
 app.use(() => {
-  throw notFound("Manzil topilmadi");
+  throw notFound(msg("Адрес не найден", "Дарек табылган жок"));
 });
 app.use(errorHandler);

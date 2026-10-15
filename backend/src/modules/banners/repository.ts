@@ -1,19 +1,26 @@
 import type { Db } from "../../core/db.js";
+import { col, type Lang } from "../../core/i18n.js";
 
 export interface BannerInput {
   title: string;
+  title_ky: string;
   subtitle: string;
+  subtitle_ky: string;
   image: string | null;
   link: string | null;
   cta: string | null;
+  cta_ky: string;
   theme: "dark" | "light" | "lime";
   placement: "hero" | "promo";
   sort: number;
   active: boolean;
 }
 
-export async function listPublic(db: Db) {
-  const { rows } = await db.query("SELECT * FROM banners WHERE active ORDER BY placement, sort, id");
+export async function listPublic(db: Db, lang: Lang) {
+  const { rows } = await db.query(
+    `SELECT id, ${col(lang, "title")}, ${col(lang, "subtitle")}, image, link, ${col(lang, "cta")}, theme, placement, sort, active
+       FROM banners WHERE active ORDER BY placement, sort, id`,
+  );
   return rows;
 }
 
@@ -22,11 +29,13 @@ export async function listAll(db: Db) {
   return rows;
 }
 
-const FIELDS = ["title", "subtitle", "image", "link", "cta", "theme", "placement", "sort", "active"] as const;
+const FIELDS = [
+  "title", "title_ky", "subtitle", "subtitle_ky", "image", "link", "cta", "cta_ky", "theme", "placement", "sort", "active",
+] as const;
 
 export async function insert(db: Db, b: BannerInput) {
   const { rows } = await db.query(
-    `INSERT INTO banners (${FIELDS.join(", ")}) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+    `INSERT INTO banners (${FIELDS.join(", ")}) VALUES (${FIELDS.map((_, i) => `$${i + 1}`).join(", ")}) RETURNING *`,
     FIELDS.map((f) => b[f]),
   );
   return rows[0];

@@ -1,26 +1,28 @@
+import type { Dict } from "@/shared/i18n/dict";
+
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 
-/** 9490000 → "9 490 000 so'm" */
-export const formatMoney = (n: number) => `${money.format(Math.round(n)).replace(/\u00a0|\u202f/g, " ")} so'm`;
+/** 9490000 → "9 490 000 сум" (same currency word in Russian and Kyrgyz). */
+export const formatMoney = (n: number) => `${money.format(Math.round(n)).replace(/\u00a0|\u202f/g, " ")} сум`;
 
 export const formatNumber = (n: number) => money.format(n).replace(/\u00a0|\u202f/g, " ");
 
-const MONTHS = ["yan", "fev", "mar", "apr", "may", "iyun", "iyul", "avg", "sen", "okt", "noy", "dek"];
+const pad = (n: number) => String(n).padStart(2, "0");
 
+/** "21.09.2026" or "21.09.2026, 14:05" — numeric, so it reads the same in both languages. */
 export function formatDate(iso: string, withTime = false) {
   const d = new Date(iso);
-  const date = `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-  if (!withTime) return date;
-  return `${date}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const date = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+  return withTime ? `${date}, ${pad(d.getHours())}:${pad(d.getMinutes())}` : date;
 }
 
-export function formatRelative(iso: string) {
+export function formatRelative(iso: string, t: Dict["time"]) {
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.round(diff / 60000);
-  if (min < 1) return "hozirgina";
-  if (min < 60) return `${min} daqiqa oldin`;
+  if (min < 1) return t.now;
+  if (min < 60) return t.min(min);
   const h = Math.round(min / 60);
-  if (h < 24) return `${h} soat oldin`;
+  if (h < 24) return t.hour(h);
   return formatDate(iso, true);
 }
 
@@ -33,7 +35,3 @@ export function formatPhone(p: string) {
 
 export const discountPercent = (price: number, old: number | null) =>
   old && old > price ? Math.round(((old - price) / old) * 100) : 0;
-
-export function plural(n: number, word: string) {
-  return `${formatNumber(n)} ${word}`;
-}

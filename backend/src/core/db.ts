@@ -1,7 +1,7 @@
 import pg from "pg";
 import { config } from "./config.js";
 
-// NUMERIC money (so'm, 2 decimals) and COUNT(*) fit safely in a JS number.
+// NUMERIC money (UZS, 2 decimals) and COUNT(*) fit safely in a JS number.
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (v) => Number(v));
 pg.types.setTypeParser(pg.types.builtins.INT8, (v) => Number(v));
 

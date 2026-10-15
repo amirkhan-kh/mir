@@ -1,3 +1,4 @@
+import { getLang } from "@/shared/i18n/server";
 import { mockGet } from "@/shared/mock/api";
 import type { Store } from "./types";
 
@@ -15,11 +16,12 @@ function apiBase(): string | null {
   return `${(origin ?? "http://localhost:4010").replace(/\/+$/, "")}/api/v1`;
 }
 
-/** Server-side read from the public API. Returns null on 404. */
+/** Server-side read from the public API in the request language. Returns null on 404. */
 export async function serverGet<T>(path: string): Promise<T | null> {
+  const localized = `${path}${path.includes("?") ? "&" : "?"}lang=${await getLang()}`;
   const base = apiBase();
-  if (!base) return (mockGet(path) as T | undefined) ?? null;
-  const res = await fetch(`${base}${path}`, { next: { revalidate: REVALIDATE_SECONDS } });
+  if (!base) return (mockGet(localized) as T | undefined) ?? null;
+  const res = await fetch(`${base}${localized}`, { next: { revalidate: REVALIDATE_SECONDS } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`API ${res.status} ${path}`);
   return (await res.json()) as T;

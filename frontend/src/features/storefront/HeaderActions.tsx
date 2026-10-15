@@ -3,6 +3,7 @@
 import { Heart, PackageSearch, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useCart, useFavorites } from "@/features/cart/store";
+import { useT } from "@/shared/i18n/client";
 
 function Action({ href, label, count, children }: { href: string; label: string; count?: number; children: React.ReactNode }) {
   return (
@@ -25,18 +26,19 @@ function Action({ href, label, count, children }: { href: string; label: string;
 export function HeaderActions() {
   const cart = useCart();
   const fav = useFavorites();
+  const t = useT();
   const count = cart.reduce((s, l) => s + l.qty, 0);
   return (
-    <nav aria-label="Foydalanuvchi" className="ml-auto flex items-center gap-0.5 md:ml-0">
+    <nav aria-label={t.nav.user} className="flex items-center gap-0.5">
       <span className="hidden sm:contents">
-        <Action href="/kuzatish" label="Buyurtmam">
+        <Action href="/kuzatish" label={t.nav.myOrder}>
           <PackageSearch className="size-5.5" aria-hidden />
         </Action>
       </span>
-      <Action href="/sevimlilar" label="Sevimlilar" count={fav.length}>
+      <Action href="/sevimlilar" label={t.nav.favorites} count={fav.length}>
         <Heart className="size-5.5" aria-hidden />
       </Action>
-      <Action href="/savat" label="Savat" count={count}>
+      <Action href="/savat" label={t.nav.cart} count={count}>
         <ShoppingBag className="size-5.5" aria-hidden />
       </Action>
     </nav>

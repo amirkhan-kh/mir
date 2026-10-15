@@ -1,16 +1,18 @@
 import { ArrowRight, BadgeCheck, CreditCard, ShieldCheck, Truck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getT } from "@/shared/i18n/server";
 import { formatMoney } from "@/shared/lib/format";
 import type { Banner, Category, InstallmentPlan, ProductCard as Product, Store } from "@/shared/lib/types";
 import { CategoryIcon } from "@/shared/ui/CategoryIcon";
 import { ProductCard } from "./ProductCard";
 
-export function CategoryTiles({ categories }: { categories: Category[] }) {
+export async function CategoryTiles({ categories }: { categories: Category[] }) {
+  const t = await getT();
   return (
     <section aria-labelledby="cat-title">
       <h2 id="cat-title" className="sr-only">
-        Kategoriyalar
+        {t.nav.categories}
       </h2>
       <ul className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 md:grid-cols-6">
         {categories.map((c) => (
@@ -31,16 +33,17 @@ export function CategoryTiles({ categories }: { categories: Category[] }) {
   );
 }
 
-export function Benefits({ store }: { store: Store }) {
+export async function Benefits({ store }: { store: Store }) {
+  const t = await getT();
   const maxPlan = store.installment.reduce((m, p) => Math.max(m, p.months), 0);
   const items = [
-    { icon: Truck, title: "O'z kuryerlarimiz", text: `${formatMoney(store.free_delivery_from)} dan bepul yetkazish` },
-    { icon: CreditCard, title: "Muddatli to'lov", text: maxPlan ? `${maxPlan} oygacha, qabul qilganda rasmiylashtiriladi` : "Naqd yoki karta orqali" },
-    { icon: ShieldCheck, title: "Rasmiy kafolat", text: "Har bir tovarga kafolat taloni" },
-    { icon: BadgeCheck, title: "Faqat original", text: "Ishonchli yetkazib beruvchilardan" },
+    { icon: Truck, title: t.home.courierTitle, text: t.home.courierText(formatMoney(store.free_delivery_from)) },
+    { icon: CreditCard, title: t.home.installmentTitle, text: maxPlan ? t.home.installmentText(maxPlan) : t.home.installmentNone },
+    { icon: ShieldCheck, title: t.home.warrantyTitle, text: t.home.warrantyText },
+    { icon: BadgeCheck, title: t.home.originalTitle, text: t.home.originalText },
   ];
   return (
-    <section aria-label="Afzalliklar" className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+    <section aria-label={t.home.benefits} className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
       {items.map((i) => (
         <div key={i.title} className="flex items-center gap-3 rounded-2xl bg-white p-3.5 sm:p-4">
           <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-ink-950 text-lime-400">
@@ -56,7 +59,7 @@ export function Benefits({ store }: { store: Store }) {
   );
 }
 
-export function ProductRail({
+export async function ProductRail({
   title,
   href,
   products,
@@ -70,6 +73,7 @@ export function ProductRail({
   accent?: string;
 }) {
   if (!products.length) return null;
+  const t = await getT();
   return (
     <section aria-labelledby={`rail-${href}`}>
       <div className="mb-4 flex items-end justify-between gap-4">
@@ -78,7 +82,7 @@ export function ProductRail({
           {title}
         </h2>
         <Link href={href} className="flex shrink-0 items-center gap-1 text-sm font-semibold text-leaf-700 hover:text-ink-950">
-          Barchasi
+          {t.home.viewAll}
           <ArrowRight className="size-4" aria-hidden />
         </Link>
       </div>
@@ -93,10 +97,11 @@ export function ProductRail({
   );
 }
 
-export function PromoBanners({ banners }: { banners: Banner[] }) {
+export async function PromoBanners({ banners }: { banners: Banner[] }) {
   if (!banners.length) return null;
+  const t = await getT();
   return (
-    <section aria-label="Maxsus takliflar" className="grid gap-3 md:grid-cols-2">
+    <section aria-label={t.home.promo} className="grid gap-3 md:grid-cols-2">
       {banners.map((b) => {
         const dark = b.theme === "dark";
         const cls = dark ? "bg-ink-950 text-white" : b.theme === "lime" ? "brand-gradient text-ink-950" : "bg-white text-ink-950";

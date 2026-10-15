@@ -6,7 +6,8 @@ import express, { Router } from "express";
 import { z } from "zod";
 import { allow } from "../../core/auth.js";
 import { config } from "../../core/config.js";
-import { invalid } from "../../core/http.js";
+import { invalid, zmsg } from "../../core/http.js";
+import { msg } from "../../core/i18n.js";
 
 export const uploadsRouter = Router();
 
@@ -15,7 +16,7 @@ export const imageUrl = z
   .string()
   .trim()
   .max(500)
-  .refine((v) => /^\/uploads\/[a-z0-9/_.-]+$/i.test(v) || /^https:\/\/\S+$/i.test(v), "Rasm manzili noto'g'ri");
+  .refine((v) => /^\/uploads\/[a-z0-9/_.-]+$/i.test(v) || /^https:\/\/\S+$/i.test(v), zmsg("Неверный адрес изображения", "Сүрөттүн дареги туура эмес"));
 
 const TYPES: Record<string, { ext: string; magic: (b: Buffer) => boolean }> = {
   "image/jpeg": { ext: "jpg", magic: (b) => b[0] === 0xff && b[1] === 0xd8 },
@@ -31,8 +32,8 @@ uploadsRouter.post(
   async (req, res) => {
     const type = TYPES[String(req.headers["content-type"]).split(";")[0].trim()];
     const body = req.body as Buffer;
-    if (!type || !Buffer.isBuffer(body) || body.length === 0) throw invalid("Faqat JPG, PNG, WEBP yoki AVIF rasm yuklang");
-    if (!type.magic(body)) throw invalid("Fayl rasm emas yoki buzilgan");
+    if (!type || !Buffer.isBuffer(body) || body.length === 0) throw invalid(msg("Загружайте только JPG, PNG, WEBP или AVIF", "JPG, PNG, WEBP же AVIF гана жүктөңүз"));
+    if (!type.magic(body)) throw invalid(msg("Файл не является изображением или повреждён", "Файл сүрөт эмес же бузулган"));
     const month = new Date().toISOString().slice(0, 7);
     const name = `${crypto.randomBytes(12).toString("hex")}.${type.ext}`;
     if (config.blobToken) {

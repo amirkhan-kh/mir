@@ -3,8 +3,10 @@
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { useT } from "@/shared/i18n/client";
 
 export function ProductGallery({ images, name }: { images: string[]; name: string }) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   const count = images.length;
   const go = (i: number) => setIndex((i + count) % count);
@@ -19,12 +21,12 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
   return (
     <div className="flex flex-col-reverse gap-3 md:flex-row">
       {count > 1 ? (
-        <ul className="scrollbar-none flex gap-2 overflow-x-auto md:max-h-[520px] md:flex-col md:overflow-y-auto" aria-label="Rasmlar">
+        <ul className="scrollbar-none flex gap-2 overflow-x-auto md:max-h-[520px] md:flex-col md:overflow-y-auto" aria-label={t.product.images}>
           {images.map((src, i) => (
             <li key={src} className="shrink-0">
               <button
                 type="button"
-                aria-label={`${i + 1}-rasm`}
+                aria-label={t.product.image(i + 1)}
                 aria-pressed={i === index}
                 onClick={() => setIndex(i)}
                 className={`relative block size-16 overflow-hidden rounded-xl bg-white ring-2 transition md:size-20 ${i === index ? "ring-ink-950" : "ring-transparent hover:ring-ink-200"}`}
@@ -46,10 +48,10 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
         <Image key={images[index]} src={images[index]} alt={name} fill preload sizes="(min-width: 1024px) 520px, 100vw" className="animate-fade-up object-contain p-8 mix-blend-multiply" />
         {count > 1 ? (
           <>
-            <button type="button" aria-label="Oldingi rasm" onClick={() => go(index - 1)} className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white text-ink-900 shadow-card transition hover:scale-105">
+            <button type="button" aria-label={t.product.prevImage} onClick={() => go(index - 1)} className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white text-ink-900 shadow-card transition hover:scale-105">
               <ChevronLeft className="size-5" />
             </button>
-            <button type="button" aria-label="Keyingi rasm" onClick={() => go(index + 1)} className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white text-ink-900 shadow-card transition hover:scale-105">
+            <button type="button" aria-label={t.product.nextImage} onClick={() => go(index + 1)} className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white text-ink-900 shadow-card transition hover:scale-105">
               <ChevronRight className="size-5" />
             </button>
             <span className="absolute bottom-3 right-3 rounded-full bg-ink-950/80 px-2.5 py-1 text-xs font-semibold text-white">

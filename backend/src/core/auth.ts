@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { config } from "./config.js";
 import { pool } from "./db.js";
 import { forbidden, unauthorized } from "./http.js";
+import { msg } from "./i18n.js";
 
 export const COOKIE = "mir_token";
 export type Role = "admin" | "manager" | "courier";
@@ -21,6 +22,8 @@ declare global {
     }
   }
 }
+
+const EXPIRED = msg("Сессия истекла, войдите снова", "Сессия бүттү, кайра кириңиз");
 
 const TTL_SECONDS = 60 * 60 * 24 * 7;
 
@@ -56,14 +59,14 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
   try {
     payload = jwt.verify(token, config.jwtSecret) as { sub: string; v: number };
   } catch {
-    throw unauthorized("Sessiya tugagan, qayta kiring");
+    throw unauthorized(EXPIRED);
   }
   const { rows } = await pool.query(
     "SELECT id, username, full_name, role, active, token_version FROM users WHERE id = $1",
     [Number(payload.sub)],
   );
   const user = rows[0];
-  if (!user || !user.active || user.token_version !== payload.v) throw unauthorized("Sessiya tugagan, qayta kiring");
+  if (!user || !user.active || user.token_version !== payload.v) throw unauthorized(EXPIRED);
   req.user = { id: user.id, username: user.username, full_name: user.full_name, role: user.role };
   next();
 }

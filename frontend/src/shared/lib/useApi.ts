@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/shared/i18n/client";
 import { api, ApiError } from "./api";
 
 export interface ApiState<T> {
@@ -18,6 +19,7 @@ export function useApi<T>(path: string | null, opts: { pollMs?: number } = {}): 
   const [loading, setLoading] = useState(Boolean(path));
   const [tick, setTick] = useState(0);
   const seq = useRef(0);
+  const errorText = useT().common.error;
 
   useEffect(() => {
     if (!path) return;
@@ -31,12 +33,12 @@ export function useApi<T>(path: string | null, opts: { pollMs?: number } = {}): 
       })
       .catch((e: unknown) => {
         if (id !== seq.current) return;
-        setError(e instanceof ApiError ? e.message : "Xatolik yuz berdi");
+        setError(e instanceof ApiError ? e.message : errorText);
       })
       .finally(() => {
         if (id === seq.current) setLoading(false);
       });
-  }, [path, tick]);
+  }, [path, tick, errorText]);
 
   useEffect(() => {
     if (!opts.pollMs || !path) return;

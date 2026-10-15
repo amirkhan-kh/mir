@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import { tx } from "../../core/db.js";
 import { conflict, notFound } from "../../core/http.js";
+import { msg } from "../../core/i18n.js";
+
+const NO_STAFF = msg("Сотрудник не найден", "Кызматкер табылган жок");
 import * as repo from "./repository.js";
 
 export interface StaffInput {
@@ -24,21 +27,21 @@ export const update = (
   tx(async (db) => {
     const admins = await repo.lockActiveAdmins(db);
     const user = await repo.lock(db, id);
-    if (!user) throw notFound("Xodim topilmadi");
+    if (!user) throw notFound(NO_STAFF);
     const roleChanged = user.role !== input.role;
     const blocked = user.active && !input.active;
     if (id === actorId && (roleChanged || blocked)) {
-      throw conflict("O'z rolingizni o'zgartira yoki o'zingizni bloklay olmaysiz");
+      throw conflict(msg("Нельзя менять свою роль или блокировать себя", "Өз ролуңузду өзгөртүүгө же өзүңүздү бөгөттөөгө болбойт"));
     }
     const losesAdmin = user.role === "admin" && user.active && (roleChanged || blocked);
-    if (losesAdmin && admins.length <= 1) throw conflict("Kamida bitta faol administrator qolishi kerak");
+    if (losesAdmin && admins.length <= 1) throw conflict(msg("Должен остаться хотя бы один активный администратор", "Жок дегенде бир активдүү администратор калышы керек"));
     return repo.update(db, id, { ...input, bump: roleChanged || blocked });
   });
 
 export const resetPassword = async (id: number, password: string) => {
   const hash = await bcrypt.hash(password, 10);
   await tx(async (db) => {
-    if (!(await repo.lock(db, id))) throw notFound("Xodim topilmadi");
+    if (!(await repo.lock(db, id))) throw notFound(NO_STAFF);
     await repo.setPassword(db, id, hash);
   });
 };

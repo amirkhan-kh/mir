@@ -2,7 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { allow } from "../../core/auth.js";
 import { pool } from "../../core/db.js";
-import { idParam, pageOf, parse } from "../../core/http.js";
+import { langOf } from "../../core/i18n.js";
+import { idParam, pageOf, parse, zmsg } from "../../core/http.js";
 import { rateLimit } from "../../core/rate-limit.js";
 import { normalizePhone } from "../../core/text.js";
 import * as repo from "./repository.js";
@@ -13,16 +14,16 @@ export const ordersRouter = Router();
 
 const lines = z
   .array(z.object({ product_id: z.coerce.number().int().positive(), qty: z.coerce.number().int().min(1).max(99) }))
-  .min(1, "Savat bo'sh")
+  .min(1, zmsg("Корзина пуста", "Себет бош"))
   .max(50);
 
 const checkoutSchema = z
   .object({
     idempotency_key: z.string().trim().min(8).max(64).nullable().optional().transform((v) => v ?? null),
-    customer_name: z.string().trim().min(2, "Ismingizni kiriting").max(80),
+    customer_name: z.string().trim().min(2, zmsg("Введите имя", "Атыңызды жазыңыз")).max(80),
     phone: z.string().trim().max(20).transform((v, ctx) => {
       const p = normalizePhone(v);
-      if (!p) ctx.addIssue({ code: "custom", message: "Telefon raqam noto'g'ri (+998 XX XXX XX XX)" });
+      if (!p) ctx.addIssue({ code: "custom", message: zmsg("Неверный номер телефона (+998 XX XXX XX XX)", "Телефон номери туура эмес (+998 XX XXX XX XX)") });
       return p ?? "";
     }),
     region: z.string().trim().min(2).max(60),
@@ -35,16 +36,16 @@ const checkoutSchema = z
   })
   .refine((o) => o.delivery_method === "pickup" || o.address.length >= 5, {
     path: ["address"],
-    message: "Yetkazib berish manzilini to'liq yozing",
+    message: zmsg("Укажите полный адрес доставки", "Жеткирүү дарегин толук жазыңыз"),
   })
   .refine((o) => o.payment_method !== "installment" || o.installment_months !== null, {
     path: ["installment_months"],
-    message: "Muddatni tanlang",
+    message: zmsg("Выберите срок", "Мөөнөттү тандаңыз"),
   });
 
 ordersPublic.post("/quote", async (req, res) => {
   const body = parse(z.object({ items: z.array(z.object({ product_id: z.coerce.number().int().positive(), qty: z.coerce.number().int().min(1).max(99) })).max(50) }), req.body);
-  res.json(await service.quote(body.items));
+  res.json(await service.quote(body.items, langOf(req)));
 });
 
 ordersPublic.post("/", rateLimit("checkout", 10, 10 * 60_000), async (req, res) => {

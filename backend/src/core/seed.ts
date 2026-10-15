@@ -5,13 +5,13 @@ import bcrypt from "bcryptjs";
 import { DEFAULT_STORE, putStore } from "../modules/settings/repository.js";
 import { config } from "./config.js";
 import { pool, tx } from "./db.js";
-import { BANNERS, CATEGORIES, CUSTOMERS, PRODUCTS, REVIEWS } from "./seed-data.js";
+import { BANNERS, CATEGORIES, CUSTOMERS, PENDING_REVIEW, PRODUCTS, REVIEWS, productTexts } from "./seed-data.js";
 import { slugify } from "./text.js";
 
 const STAFF = [
-  { username: "manager", full_name: "Malika Menejer", phone: "+998901000001", role: "manager" },
-  { username: "courier1", full_name: "Bekzod Kuryer", phone: "+998901000002", role: "courier" },
-  { username: "courier2", full_name: "Rustam Kuryer", phone: "+998901000003", role: "courier" },
+  { username: "manager", full_name: "Малика Менеджер", phone: "+998901000001", role: "manager" },
+  { username: "courier1", full_name: "Бекзод Курьер", phone: "+998901000002", role: "courier" },
+  { username: "courier2", full_name: "Рустам Курьер", phone: "+998901000003", role: "courier" },
 ];
 
 const seedDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../public/uploads/seed");
@@ -38,7 +38,7 @@ export async function seed() {
   const admin = await pool.query("SELECT 1 FROM users WHERE username = $1", [config.adminUsername]);
   if (admin.rowCount === 0) {
     await pool.query(
-      "INSERT INTO users (username, password_hash, full_name, role) VALUES ($1, $2, 'Administrator', 'admin')",
+      "INSERT INTO users (username, password_hash, full_name, role) VALUES ($1, $2, 'Администратор', 'admin')",
       [config.adminUsername, await bcrypt.hash(config.adminPassword, 10)],
     );
     console.log(`seed: admin user "${config.adminUsername}" created`);
@@ -63,8 +63,8 @@ export async function seed() {
     const catIds = new Map<string, number>();
     for (const c of CATEGORIES) {
       const r = await db.query(
-        "INSERT INTO categories (name, slug, icon, sort, active) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-        [c.name, c.slug, c.icon, c.sort, c.active],
+        "INSERT INTO categories (name, name_ky, slug, icon, sort, active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+        [c.name, c.name_ky, c.slug, c.icon, c.sort, c.active],
       );
       catIds.set(c.slug, r.rows[0].id);
     }
@@ -74,17 +74,19 @@ export async function seed() {
     for (const p of PRODUCTS) {
       n += 1;
       const images = seedImages(p.img);
-      const description = `${p.short}\n\n${p.name} — Mir do'konidan rasmiy kafolat bilan. Buyurtmangizni o'z kuryerlarimiz yetkazib beradi, to'lovni qabul qilganda naqd yoki karta orqali amalga oshirasiz.\n\nTo'plamda: qurilma, hujjatlar va kafolat taloni.`;
+      const t = productTexts(p);
       const r = await db.query(
-        `INSERT INTO products (category_id, name, slug, sku, brand, short_description, description, price, old_price, stock,
-                               images, specs, warranty_months, badge, is_featured, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now() - ($16 || ' days')::interval)
+        `INSERT INTO products (category_id, name, name_ky, slug, sku, brand, short_description, short_description_ky,
+                               description, description_ky, price, old_price, stock, images, specs, specs_ky,
+                               warranty_months, badge, badge_ky, is_featured, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
+                 now() - ($21 || ' days')::interval)
          RETURNING id`,
         [
-          catIds.get(p.cat), p.name, slugify(p.name), `MIR-${String(n).padStart(4, "0")}`, p.brand, p.short, description,
-          p.price, p.old ?? null, p.stock, images,
-          JSON.stringify([...p.specs.map(([label, value]) => ({ label, value })), { label: "Kafolat", value: `${p.warranty ?? 12} oy` }]),
-          p.warranty ?? 12, p.badge ?? null, p.featured ?? false, String(PRODUCTS.length - n),
+          catIds.get(p.cat), t.name, t.name_ky, slugify(p.name), `MIR-${String(n).padStart(4, "0")}`, p.brand,
+          t.short_description, t.short_description_ky, t.description, t.description_ky, p.price, p.old ?? null, p.stock,
+          images, JSON.stringify(t.specs), JSON.stringify(t.specs_ky), p.warranty ?? 12, t.badge, t.badge_ky,
+          p.featured ?? false, String(PRODUCTS.length - n),
         ],
       );
       products.push({ id: r.rows[0].id, price: p.price, name: p.name, image: images[0] ?? null });
@@ -92,8 +94,9 @@ export async function seed() {
 
     for (const b of BANNERS) {
       await db.query(
-        `INSERT INTO banners (title, subtitle, image, link, cta, theme, placement, sort) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [b.title, b.subtitle, b.image, b.link, b.cta, b.theme, b.placement, b.sort],
+        `INSERT INTO banners (title, title_ky, subtitle, subtitle_ky, image, link, cta, cta_ky, theme, placement, sort)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [b.title, b.title_ky, b.subtitle, b.subtitle_ky, b.image, b.link, b.cta, b.cta_ky, b.theme, b.placement, b.sort],
       );
     }
 
@@ -109,10 +112,9 @@ export async function seed() {
         );
       }
     }
-    await db.query(
-      `INSERT INTO reviews (product_id, author, rating, text) VALUES ($1, 'Kamola', 5, 'Ajoyib telefon, kamerasi zo''r!')`,
-      [products[0].id],
-    );
+    await db.query("INSERT INTO reviews (product_id, author, rating, text) VALUES ($1, $2, $3, $4)", [
+      products[0].id, ...PENDING_REVIEW,
+    ]);
     await db.query(`
       UPDATE products p SET
         rating_avg = COALESCE((SELECT ROUND(AVG(rating)::numeric, 2) FROM reviews WHERE product_id = p.id AND status = 'approved'), 0),
@@ -131,7 +133,7 @@ export async function seed() {
       const o = await db.query(
         `INSERT INTO orders (customer_name, phone, region, address, delivery_method, payment_method, status, subtotal,
                              delivery_fee, total, assignee_id, created_at, updated_at)
-         VALUES ($1, $2, $3, 'Mustaqillik ko''chasi, 12-uy', 'courier', $4, $5, $6, $7, $8, $9,
+         VALUES ($1, $2, $3, 'ул. Мустакиллик, д. 12', 'courier', $4, $5, $6, $7, $8, $9,
                  now() - ($10 || ' days')::interval - ($11 || ' hours')::interval, now() - ($10 || ' days')::interval)
          RETURNING id`,
         [name, phone, region, i % 3 === 0 ? "card" : "cash", status, subtotal, fee, subtotal + fee, assignee,
@@ -146,7 +148,7 @@ export async function seed() {
       }
       await db.query(
         `INSERT INTO order_events (order_id, status, note, created_at)
-         SELECT id, 'new', 'Buyurtma saytdan qabul qilindi', created_at FROM orders WHERE id = $1`,
+         SELECT id, 'new', 'Заказ принят с сайта', created_at FROM orders WHERE id = $1`,
         [o.rows[0].id],
       );
       if (status !== "new") {

@@ -3,6 +3,7 @@
 import { Star } from "lucide-react";
 import { useState } from "react";
 import { api, ApiError } from "@/shared/lib/api";
+import { useT } from "@/shared/i18n/client";
 import { formatDate } from "@/shared/lib/format";
 import type { ProductDetail } from "@/shared/lib/types";
 import { Button } from "@/shared/ui/Button";
@@ -11,13 +12,14 @@ import { Alert } from "@/shared/ui/States";
 import { Stars } from "@/shared/ui/Stars";
 
 function ReviewForm({ productId }: { productId: number }) {
+  const t = useT();
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (done) return <Alert tone="success">Rahmat! Sharhingiz moderatsiyadan so'ng chop etiladi.</Alert>;
+  if (done) return <Alert tone="success">{t.reviews.thanks}</Alert>;
 
   return (
     <form
@@ -31,34 +33,35 @@ function ReviewForm({ productId }: { productId: number }) {
           await api("/public/reviews", { method: "POST", json: { product_id: productId, rating, author: f.get("author"), text: f.get("text") } });
           setDone(true);
         } catch (err) {
-          setError(err instanceof ApiError ? err.message : "Xatolik");
+          setError(err instanceof ApiError ? err.message : t.common.error);
         } finally {
           setSaving(false);
         }
       }}
     >
-      <h3 className="font-display text-base font-semibold">Sharh qoldirish</h3>
+      <h3 className="font-display text-base font-semibold">{t.reviews.leave}</h3>
       <fieldset>
-        <legend className="mb-1.5 text-sm font-semibold text-ink-800">Bahoyingiz</legend>
+        <legend className="mb-1.5 text-sm font-semibold text-ink-800">{t.reviews.yourRating}</legend>
         <div className="flex gap-1" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <button key={i} type="button" aria-label={`${i} yulduz`} aria-pressed={rating === i} onMouseEnter={() => setHover(i)} onClick={() => setRating(i)} className="rounded-md p-0.5 transition-transform hover:scale-110">
+            <button key={i} type="button" aria-label={t.reviews.star(i)} aria-pressed={rating === i} onMouseEnter={() => setHover(i)} onClick={() => setRating(i)} className="rounded-md p-0.5 transition-transform hover:scale-110">
               <Star className={`size-7 ${(hover || rating) >= i ? "fill-amber-400 text-amber-400" : "fill-ink-200 text-ink-200"}`} aria-hidden />
             </button>
           ))}
         </div>
       </fieldset>
-      <Field label="Ismingiz">{(id) => <Input id={id} name="author" required minLength={2} maxLength={60} autoComplete="given-name" />}</Field>
-      <Field label="Fikringiz">{(id) => <Textarea id={id} name="text" maxLength={1000} placeholder="Tovar sizga yoqdimi? Sifati, yetkazib berish haqida yozing" />}</Field>
+      <Field label={t.reviews.name}>{(id) => <Input id={id} name="author" required minLength={2} maxLength={60} autoComplete="given-name" />}</Field>
+      <Field label={t.reviews.text}>{(id) => <Textarea id={id} name="text" maxLength={1000} placeholder={t.reviews.textPlaceholder} />}</Field>
       {error ? <Alert>{error}</Alert> : null}
       <Button type="submit" variant="dark" disabled={saving}>
-        {saving ? "Yuborilmoqda…" : "Yuborish"}
+        {saving ? t.common.sending : t.common.send}
       </Button>
     </form>
   );
 }
 
 export function Reviews({ product: p }: { product: ProductDetail }) {
+  const t = useT();
   const total = Object.values(p.rating_breakdown).reduce((s, n) => s + n, 0);
   return (
     <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
@@ -68,7 +71,7 @@ export function Reviews({ product: p }: { product: ProductDetail }) {
           <div className="mt-2">
             <Stars value={Number(p.rating_avg)} size="size-5" />
           </div>
-          <p className="mt-1 text-sm text-ink-500">{p.rating_count} ta sharh asosida</p>
+          <p className="mt-1 text-sm text-ink-500">{t.reviews.basedOn(p.rating_count)}</p>
           <ul className="mt-4 space-y-1.5">
             {[5, 4, 3, 2, 1].map((r) => {
               const n = p.rating_breakdown[r] ?? 0;
@@ -109,7 +112,7 @@ export function Reviews({ product: p }: { product: ProductDetail }) {
             ))}
           </ul>
         ) : (
-          <div className="rounded-2xl bg-white p-8 text-center text-sm text-ink-500">Hali sharh yo'q. Birinchi bo'lib fikr qoldiring!</div>
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-ink-500">{t.reviews.none}</div>
         )}
       </div>
     </div>

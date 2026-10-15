@@ -9,7 +9,7 @@ Only when the prompt asks (task `3.3` or "deploy"). Otherwise `Need permit: depl
 
 ### Vercel mock mode (current)
 
-The backend service is disconnected; only `frontend` is deployed. With no `BACKEND_URL` binding, server reads come from `frontend/src/shared/mock` (generated from `backend/src/core/seed-data.ts`), `/api/v1/*` is answered by `frontend/src/app/api/v1/[...path]/route.ts` (catalog reads and cart quote; checkout, reviews and login return 503), and seed images are served from `frontend/public/uploads/seed`. Locally: `MOCK_API=1 npm run dev`.
+The backend service is disconnected; only `frontend` is deployed. With no `BACKEND_URL` binding, server reads come from `frontend/src/shared/mock` (generated from `backend/src/core/seed-data.ts`), `/api/v1/*` is answered by `frontend/src/app/api/v1/[...path]/route.ts` (catalog reads and cart quote; checkout, reviews and login return 503), and seed images are served from `frontend/public/uploads/seed`. Locally: `MOCK_API=1 npm run dev`. After changing seed texts, regenerate the mock with `cd backend && npx tsx scripts/mock-data.ts`.
 
 To reconnect the backend, add back to the root `vercel.json`:
 

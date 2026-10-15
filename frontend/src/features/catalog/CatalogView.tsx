@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
 import Link from "next/link";
-import { longestPlan, ProductGrid } from "@/features/storefront/ProductCard";
+import { ProductGrid } from "@/features/storefront/ProductCard";
+import { getT } from "@/shared/i18n/server";
+import { longestPlan } from "@/shared/lib/installment";
 import { getStore, serverGet } from "@/shared/lib/server";
 import type { Category, ProductList } from "@/shared/lib/types";
 import { CategoryIcon } from "@/shared/ui/CategoryIcon";
@@ -22,9 +24,10 @@ function pick(sp: SearchParams) {
   return out;
 }
 
-export function Breadcrumbs({ items }: { items: { href?: string; label: string }[] }) {
+export async function Breadcrumbs({ items }: { items: { href?: string; label: string }[] }) {
+  const t = await getT();
   return (
-    <nav aria-label="Yo'l" className="mb-4 text-sm text-ink-500">
+    <nav aria-label={t.nav.breadcrumbs} className="mb-4 text-sm text-ink-500">
       <ol className="flex flex-wrap items-center gap-1.5">
         {items.map((i, idx) => (
           <li key={idx} className="flex items-center gap-1.5">
@@ -46,6 +49,7 @@ export function Breadcrumbs({ items }: { items: { href?: string; label: string }
 }
 
 export async function CatalogView({ sp, category, categories }: { sp: SearchParams; category: Category | null; categories: Category[] }) {
+  const t = await getT();
   const params = pick(sp);
   const page = Math.max(1, Number(params.get("page")) || 1);
   const api = new URLSearchParams(params);
@@ -55,7 +59,7 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
   const data = list ?? { items: [], total: 0, page: 1, limit: LIMIT, facets: { brands: [], price: { min: 0, max: 0 } } };
   const pages = Math.max(1, Math.ceil(data.total / LIMIT));
   const q = params.get("q");
-  const title = q ? `“${q}” bo'yicha natijalar` : category?.name ?? (params.get("discount") ? "Chegirmalar" : params.get("featured") ? "Ommabop tovarlar" : "Barcha tovarlar");
+  const title = q ? t.catalog.results(q) : category?.name ?? (params.get("discount") ? t.catalog.discounts : params.get("featured") ? t.catalog.popular : t.catalog.all);
   const base = category ? `/katalog/${category.slug}` : "/katalog";
   const pageHref = (p: number) => {
     const n = new URLSearchParams(params);
@@ -66,11 +70,11 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
 
   return (
     <div>
-      <Breadcrumbs items={[{ href: "/", label: "Bosh sahifa" }, { href: category ? "/katalog" : undefined, label: "Katalog" }, ...(category ? [{ label: category.name }] : [])]} />
+      <Breadcrumbs items={[{ href: "/", label: t.nav.home }, { href: category ? "/katalog" : undefined, label: t.nav.catalog }, ...(category ? [{ label: category.name }] : [])]} />
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-950 sm:text-3xl">{title}</h1>
-          <p className="mt-1 text-sm text-ink-500">{data.total} ta tovar</p>
+          <p className="mt-1 text-sm text-ink-500">{t.nav.productsCount(data.total)}</p>
         </div>
       </div>
 
@@ -100,20 +104,20 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
             <div className="rounded-3xl bg-white">
               <Empty
                 icon={<SearchX className="size-6" aria-hidden />}
-                title="Hech narsa topilmadi"
-                hint="Filtrlarni o'zgartiring yoki boshqa so'z bilan qidirib ko'ring."
+                title={t.catalog.notFound}
+                hint={t.catalog.notFoundHint}
                 action={
                   <Link href={base} className="text-sm font-semibold text-leaf-700 hover:underline">
-                    Filtrlarni tozalash
+                    {t.catalog.clear}
                   </Link>
                 }
               />
             </div>
           )}
           {pages > 1 ? (
-            <nav aria-label="Sahifalar" className="mt-8 flex items-center justify-center gap-2">
+            <nav aria-label={t.catalog.pages} className="mt-8 flex items-center justify-center gap-2">
               {page > 1 ? (
-                <Link href={pageHref(page - 1)} aria-label="Oldingi sahifa" className="grid size-10 place-items-center rounded-xl bg-white ring-1 ring-ink-200 hover:ring-ink-400">
+                <Link href={pageHref(page - 1)} aria-label={t.common.prevPage} className="grid size-10 place-items-center rounded-xl bg-white ring-1 ring-ink-200 hover:ring-ink-400">
                   <ChevronLeft className="size-4" />
                 </Link>
               ) : null}
@@ -132,7 +136,7 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
                   </span>
                 ))}
               {page < pages ? (
-                <Link href={pageHref(page + 1)} aria-label="Keyingi sahifa" className="grid size-10 place-items-center rounded-xl bg-white ring-1 ring-ink-200 hover:ring-ink-400">
+                <Link href={pageHref(page + 1)} aria-label={t.common.nextPage} className="grid size-10 place-items-center rounded-xl bg-white ring-1 ring-ink-200 hover:ring-ink-400">
                   <ChevronRight className="size-4" />
                 </Link>
               ) : null}

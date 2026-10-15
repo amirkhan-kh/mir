@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { formatMoney, formatRelative } from "@/shared/lib/format";
-import { ORDER_STATUS } from "@/shared/lib/status";
+import { useT } from "@/shared/i18n/client";
+import { ORDER_TONE } from "@/shared/lib/status";
 import type { OrderStatus } from "@/shared/lib/types";
 import { useApi } from "@/shared/lib/useApi";
 import { Badge } from "@/shared/ui/Badge";
@@ -34,6 +35,8 @@ interface Summary {
 
 export function Dashboard() {
   const user = useSession();
+  const t = useT();
+  const d = t.admin.dashboard;
   const router = useRouter();
   const isCourier = user.role === "courier";
   useEffect(() => {
@@ -50,29 +53,29 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`Salom, ${user.full_name.split(" ")[0]}!`} subtitle="Do'kon bo'yicha bugungi holat" />
+      <PageHeader title={d.hello(user.full_name.split(" ")[0])} subtitle={d.subtitle} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Link href="/admin/buyurtmalar?status=new" className="block">
-          <KpiCard accent label="Yangi buyurtmalar" value={k.orders_new} hint="Qo'ng'iroq qilib tasdiqlang" icon={<ShoppingCart className="size-4.5" />} />
+          <KpiCard accent label={d.newOrders} value={k.orders_new} hint={d.newOrdersHint} icon={<ShoppingCart className="size-4.5" />} />
         </Link>
-        <KpiCard label="Bugun tushgan" value={k.orders_today} hint={`Jarayonda: ${k.orders_in_progress}`} icon={<Clock className="size-4.5" />} />
-        <KpiCard label="Shu oy yetkazilgan" value={formatMoney(k.revenue_month)} hint="Yetkazilgan buyurtmalar summasi" icon={<Wallet className="size-4.5" />} />
-        <KpiCard label="O'rtacha chek (30 kun)" value={formatMoney(avg)} hint={`${k.orders_30d} ta buyurtma`} icon={<TrendingUp className="size-4.5" />} />
+        <KpiCard label={d.today} value={k.orders_today} hint={d.inProgress(k.orders_in_progress)} icon={<Clock className="size-4.5" />} />
+        <KpiCard label={d.deliveredMonth} value={formatMoney(k.revenue_month)} hint={d.deliveredMonthHint} icon={<Wallet className="size-4.5" />} />
+        <KpiCard label={d.avgCheck} value={formatMoney(avg)} hint={d.orders(k.orders_30d)} icon={<TrendingUp className="size-4.5" />} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <Card className="p-5">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-display text-base font-semibold">Savdo — 14 kun</h2>
-            <span className="text-sm text-ink-500">30 kun: {formatMoney(k.sales_30d)}</span>
+            <h2 className="font-display text-base font-semibold">{d.sales14}</h2>
+            <span className="text-sm text-ink-500">{d.sales30(formatMoney(k.sales_30d))}</span>
           </div>
           <SalesChart data={data.daily} />
         </Card>
         <Card className="p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-base font-semibold">So'nggi buyurtmalar</h2>
+            <h2 className="font-display text-base font-semibold">{d.recent}</h2>
             <Link href="/admin/buyurtmalar" className="flex items-center gap-1 text-sm font-semibold text-leaf-700 hover:underline">
-              Barchasi <ArrowRight className="size-3.5" aria-hidden />
+              {d.all} <ArrowRight className="size-3.5" aria-hidden />
             </Link>
           </div>
           <ul className="divide-y divide-ink-100">
@@ -83,11 +86,11 @@ export function Dashboard() {
                     <span className="block text-sm font-semibold">
                       {o.number} · <span className="font-normal text-ink-600">{o.customer_name}</span>
                     </span>
-                    <span className="text-xs text-ink-500">{formatRelative(o.created_at)}</span>
+                    <span className="text-xs text-ink-500">{formatRelative(o.created_at, t.time)}</span>
                   </span>
                   <span className="text-right">
                     <span className="block text-sm font-semibold">{formatMoney(o.total)}</span>
-                    <Badge tone={ORDER_STATUS[o.status].tone}>{ORDER_STATUS[o.status].label}</Badge>
+                    <Badge tone={ORDER_TONE[o.status]}>{t.status.order[o.status]}</Badge>
                   </span>
                 </Link>
               </li>
@@ -98,25 +101,25 @@ export function Dashboard() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="p-5">
-          <h2 className="mb-3 font-display text-base font-semibold">Top tovarlar (30 kun)</h2>
+          <h2 className="mb-3 font-display text-base font-semibold">{d.top}</h2>
           {data.top.length ? (
             <ol className="space-y-3">
-              {data.top.map((t, i) => (
-                <li key={`${t.product_id}-${i}`} className="flex items-center gap-3 text-sm">
+              {data.top.map((row, i) => (
+                <li key={`${row.product_id}-${i}`} className="flex items-center gap-3 text-sm">
                   <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-lime-200 text-xs font-bold">{i + 1}</span>
-                  <span className="line-clamp-1 flex-1">{t.name}</span>
-                  <span className="font-semibold">{t.qty} ta</span>
+                  <span className="line-clamp-1 flex-1">{row.name}</span>
+                  <span className="font-semibold">{t.common.pcs(row.qty)}</span>
                 </li>
               ))}
             </ol>
           ) : (
-            <Empty title="Hali savdo yo'q" />
+            <Empty title={d.noSales} />
           )}
         </Card>
         <Card className="p-5">
           <h2 className="mb-3 flex items-center gap-2 font-display text-base font-semibold">
             <AlertTriangle className="size-4.5 text-amber-600" aria-hidden />
-            Kam qolgan tovarlar
+            {d.lowStock}
           </h2>
           {data.low_stock.length ? (
             <ul className="space-y-2.5">
@@ -127,21 +130,21 @@ export function Dashboard() {
                       {p.image ? <Image src={p.image} alt="" fill sizes="36px" className="object-contain p-0.5" /> : null}
                     </span>
                     <span className="line-clamp-1 flex-1">{p.name}</span>
-                    <Badge tone={p.stock === 0 ? "flame" : "amber"}>{p.stock === 0 ? "Tugagan" : `${p.stock} dona`}</Badge>
+                    <Badge tone={p.stock === 0 ? "flame" : "amber"}>{p.stock === 0 ? d.out : t.common.pcs(p.stock)}</Badge>
                   </Link>
                 </li>
               ))}
             </ul>
           ) : (
-            <Empty title="Hammasi yetarli" />
+            <Empty title={d.enough} />
           )}
         </Card>
         <div className="grid gap-3">
           <Link href="/admin/tovarlar" className="block">
-            <KpiCard label="Sotuvdagi tovarlar" value={k.products_active} icon={<Package className="size-4.5" />} hint="Tovarlarni boshqarish →" />
+            <KpiCard label={d.active} value={k.products_active} icon={<Package className="size-4.5" />} hint={d.manage} />
           </Link>
           <Link href="/admin/sharhlar" className="block">
-            <KpiCard label="Kutilayotgan sharhlar" value={k.reviews_pending} icon={<MessageSquare className="size-4.5" />} hint="Moderatsiya qilish →" />
+            <KpiCard label={d.pending} value={k.reviews_pending} icon={<MessageSquare className="size-4.5" />} hint={d.moderate} />
           </Link>
         </div>
       </div>

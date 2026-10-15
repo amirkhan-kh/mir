@@ -7,6 +7,8 @@ export interface Category {
   sort: number;
   active: boolean;
   product_count: number;
+  /** Admin API only. */
+  name_ky?: string;
 }
 
 export interface ProductCard {
@@ -61,6 +63,11 @@ export interface ProductFull extends Omit<ProductCard, "images"> {
   warranty_months: number;
   is_featured: boolean;
   active: boolean;
+  name_ky: string;
+  short_description_ky: string;
+  description_ky: string;
+  specs_ky: Spec[];
+  badge_ky: string | null;
 }
 
 export interface Banner {
@@ -74,6 +81,10 @@ export interface Banner {
   placement: "hero" | "promo";
   sort: number;
   active: boolean;
+  /** Admin API only. */
+  title_ky?: string;
+  subtitle_ky?: string;
+  cta_ky?: string | null;
 }
 
 export interface InstallmentPlan {
@@ -95,6 +106,14 @@ export interface Store {
   delivery_note: string;
   regions: string[];
   installment: InstallmentPlan[];
+}
+
+/** Admin settings: public texts plus their Kyrgyz twins (empty = Russian). */
+export interface StoreSettings extends Store {
+  tagline_ky: string;
+  address_ky: string;
+  hours_ky: string;
+  delivery_note_ky: string;
 }
 
 export interface Paged<T> {

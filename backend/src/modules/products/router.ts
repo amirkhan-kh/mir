@@ -2,7 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { allow } from "../../core/auth.js";
 import { pool } from "../../core/db.js";
-import { idParam, notFound, pageOf, parse } from "../../core/http.js";
+import { idParam, notFound, pageOf, parse, zmsg } from "../../core/http.js";
+import { langOf, msg } from "../../core/i18n.js";
 import { slugify } from "../../core/text.js";
 import * as reviews from "../reviews/repository.js";
 import { imageUrl } from "../uploads/router.js";
@@ -10,6 +11,8 @@ import * as repo from "./repository.js";
 
 export const productsPublic = Router();
 export const productsRouter = Router();
+
+const NOT_FOUND = msg("Товар не найден", "Товар табылган жок");
 
 const csv = (max: number) =>
   z
@@ -45,15 +48,16 @@ productsPublic.get("/", async (req, res) => {
     discount: f.discount, featured: f.featured, inStock: f.in_stock, ids: f.ids,
     limit: f.limit, offset: (f.page - 1) * f.limit,
   };
-  const [list, facets] = await Promise.all([repo.listPublic(pool, filter), repo.facets(pool, filter)]);
+  const [list, facets] = await Promise.all([repo.listPublic(pool, filter, langOf(req)), repo.facets(pool, filter)]);
   res.json({ ...list, page: f.page, limit: f.limit, facets });
 });
 
 productsPublic.get("/:slug", async (req, res) => {
-  const product = await repo.bySlug(pool, String(req.params.slug));
-  if (!product) throw notFound("Tovar topilmadi");
+  const lang = langOf(req);
+  const product = await repo.bySlug(pool, String(req.params.slug), lang);
+  if (!product) throw notFound(NOT_FOUND);
   const [related, review] = await Promise.all([
-    repo.related(pool, product.category_id, product.id),
+    repo.related(pool, product.category_id, product.id, lang),
     reviews.forProduct(pool, product.id),
   ]);
   res.json({ ...product, related, reviews: review.items, rating_breakdown: review.breakdown });
@@ -66,24 +70,29 @@ const productSchema = z
   .object({
     category_id: z.coerce.number().int().positive(),
     name: z.string().trim().min(2).max(160),
+    name_ky: z.string().trim().max(160).default(""),
     slug: z.string().trim().max(80).optional().default(""),
     sku: z.string().trim().max(60).nullable().optional().transform((v) => v || null),
     brand: z.string().trim().max(60).nullable().optional().transform((v) => v || null),
     short_description: z.string().trim().max(300).default(""),
+    short_description_ky: z.string().trim().max(300).default(""),
     description: z.string().trim().max(10_000).default(""),
+    description_ky: z.string().trim().max(10_000).default(""),
     price: money,
     old_price: money.nullable().optional().transform((v) => (v ? v : null)),
     stock: z.coerce.number().int().min(0).max(1_000_000),
     images: z.array(imageUrl).max(10).default([]),
     specs: z.array(spec).max(40).default([]),
+    specs_ky: z.array(spec).max(40).default([]),
     warranty_months: z.coerce.number().int().min(0).max(120).default(12),
     badge: z.string().trim().max(20).nullable().optional().transform((v) => v || null),
+    badge_ky: z.string().trim().max(20).nullable().optional().transform((v) => v ?? ""),
     is_featured: z.boolean().default(false),
     active: z.boolean().default(true),
   })
   .refine((p) => p.old_price === null || p.old_price > p.price, {
     path: ["old_price"],
-    message: "Eski narx joriy narxdan katta bo'lishi kerak",
+    message: zmsg("Старая цена должна быть больше текущей", "Эски баа учурдагыдан жогору болушу керек"),
   })
   .transform((p) => ({ ...p, slug: slugify(p.slug || p.name) }));
 
@@ -103,7 +112,7 @@ productsRouter.get("/", async (req, res) => {
 
 productsRouter.get("/:id", async (req, res) => {
   const row = await repo.byId(pool, idParam(req));
-  if (!row) throw notFound("Tovar topilmadi");
+  if (!row) throw notFound(NOT_FOUND);
   res.json(row);
 });
 
@@ -113,11 +122,11 @@ productsRouter.post("/", allow("manager"), async (req, res) => {
 
 productsRouter.patch("/:id", allow("manager"), async (req, res) => {
   const row = await repo.update(pool, idParam(req), parse(productSchema, req.body));
-  if (!row) throw notFound("Tovar topilmadi");
+  if (!row) throw notFound(NOT_FOUND);
   res.json(row);
 });
 
 productsRouter.delete("/:id", allow("manager"), async (req, res) => {
-  if (!(await repo.remove(pool, idParam(req)))) throw notFound("Tovar topilmadi");
+  if (!(await repo.remove(pool, idParam(req)))) throw notFound(NOT_FOUND);
   res.status(204).end();
 });

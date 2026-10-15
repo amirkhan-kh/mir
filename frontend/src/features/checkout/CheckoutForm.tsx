@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { clearCart, useCart } from "@/features/cart/store";
 import { useQuote } from "@/features/cart/useQuote";
 import { api, ApiError } from "@/shared/lib/api";
+import { useT } from "@/shared/i18n/client";
 import { formatMoney } from "@/shared/lib/format";
 import type { DeliveryMethod, PaymentMethod, Store } from "@/shared/lib/types";
 import { Button, ButtonLink } from "@/shared/ui/Button";
@@ -49,6 +50,7 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
 }
 
 export function CheckoutForm({ store }: { store: Store }) {
+  const t = useT();
   const router = useRouter();
   const lines = useCart();
   const { quote, problems } = useQuote(lines);
@@ -74,11 +76,11 @@ export function CheckoutForm({ store }: { store: Store }) {
     }
   }, []);
 
-  if (done) return <Loading label="Buyurtma sahifasiga o'tilmoqda…" />;
+  if (done) return <Loading label={t.checkout.redirecting} />;
   if (!lines.length) {
     return (
       <div className="rounded-3xl bg-white">
-        <Empty title="Savat bo'sh" hint="Rasmiylashtirish uchun avval tovar tanlang." action={<ButtonLink href="/katalog">Katalogga o'tish</ButtonLink>} />
+        <Empty title={t.checkout.empty} hint={t.checkout.emptyHint} action={<ButtonLink href="/katalog">{t.favorites.toCatalog}</ButtonLink>} />
       </div>
     );
   }
@@ -95,7 +97,7 @@ export function CheckoutForm({ store }: { store: Store }) {
     if (saving) return;
     const f = new FormData(e.currentTarget);
     if (phone.replace(/\D/g, "").length !== 9) {
-      setError("Telefon raqamni to'liq kiriting: 90 123 45 67");
+      setError(t.checkout.phoneError);
       return;
     }
     idem.current ??= crypto.randomUUID();
@@ -108,7 +110,7 @@ export function CheckoutForm({ store }: { store: Store }) {
           idempotency_key: idem.current,
           customer_name: name,
           phone: `+998${phone.replace(/\D/g, "")}`,
-          region: delivery === "courier" ? f.get("region") : "Do'kondan olib ketish",
+          region: delivery === "courier" ? f.get("region") : t.checkout.pickupRegion,
           address: delivery === "courier" ? f.get("address") : "",
           comment: f.get("comment") ?? "",
           delivery_method: delivery,
@@ -124,7 +126,7 @@ export function CheckoutForm({ store }: { store: Store }) {
       router.replace(`/buyurtma/${order.number}`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) idem.current = null;
-      setError(err instanceof ApiError ? err.message : "Xatolik yuz berdi");
+      setError(err instanceof ApiError ? err.message : t.common.error);
       setSaving(false);
     }
   };
@@ -132,12 +134,12 @@ export function CheckoutForm({ store }: { store: Store }) {
   return (
     <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_400px]" noValidate={false}>
       <div className="space-y-4">
-        <Step n={1} title="Aloqa ma'lumotlari">
+        <Step n={1} title={t.checkout.contacts}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Ism va familiya">
-              {(id) => <Input id={id} name="customer_name" required minLength={2} maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Masalan: Aziza Karimova" />}
+            <Field label={t.checkout.fullName}>
+              {(id) => <Input id={id} name="customer_name" required minLength={2} maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t.checkout.namePlaceholder} />}
             </Field>
-            <Field label="Telefon raqam" hint="Operator shu raqamga qo'ng'iroq qiladi">
+            <Field label={t.checkout.phone} hint={t.checkout.phoneHint}>
               {(id) => (
                 <div className="flex h-11 items-center rounded-xl border border-ink-200 bg-white focus-within:border-leaf-600 focus-within:ring-4 focus-within:ring-lime-300/40">
                   <span className="pl-3.5 pr-1 text-[15px] font-medium text-ink-600">+998</span>
@@ -158,14 +160,14 @@ export function CheckoutForm({ store }: { store: Store }) {
           </div>
         </Step>
 
-        <Step n={2} title="Qabul qilish usuli">
+        <Step n={2} title={t.checkout.receive}>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Option name="delivery" value="courier" checked={delivery === "courier"} onChange={() => setDelivery("courier")} icon={<Truck className="size-5" />} title="Kuryer orqali" hint={subtotal >= store.free_delivery_from ? "Bepul" : `${formatMoney(store.delivery_fee)}, ${formatMoney(store.free_delivery_from)} dan bepul`} />
-            <Option name="delivery" value="pickup" checked={delivery === "pickup"} onChange={() => setDelivery("pickup")} icon={<StoreIcon className="size-5" />} title="Do'kondan olib ketish" hint="Bepul" />
+            <Option name="delivery" value="courier" checked={delivery === "courier"} onChange={() => setDelivery("courier")} icon={<Truck className="size-5" />} title={t.checkout.courier} hint={subtotal >= store.free_delivery_from ? t.common.free : t.checkout.courierHint(formatMoney(store.delivery_fee), formatMoney(store.free_delivery_from))} />
+            <Option name="delivery" value="pickup" checked={delivery === "pickup"} onChange={() => setDelivery("pickup")} icon={<StoreIcon className="size-5" />} title={t.checkout.pickup} hint={t.common.free} />
           </div>
           {delivery === "courier" ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-[220px_1fr]">
-              <Field label="Hudud">
+              <Field label={t.checkout.region}>
                 {(id) => (
                   <Select id={id} name="region" required defaultValue={store.regions[0]}>
                     {store.regions.map((r) => (
@@ -174,35 +176,35 @@ export function CheckoutForm({ store }: { store: Store }) {
                   </Select>
                 )}
               </Field>
-              <Field label="Manzil" hint="Tuman, ko'cha, uy, xonadon, mo'ljal">
-                {(id) => <Input id={id} name="address" required minLength={5} maxLength={240} autoComplete="street-address" placeholder="Bobur shoh ko'chasi, 12-uy, 45-xonadon" />}
+              <Field label={t.checkout.address} hint={t.checkout.addressHint}>
+                {(id) => <Input id={id} name="address" required minLength={5} maxLength={240} autoComplete="street-address" placeholder={t.checkout.addressPlaceholder} />}
               </Field>
             </div>
           ) : (
             <p className="mt-4 rounded-2xl bg-ink-50 p-4 text-sm text-ink-700">
-              <b>Manzil:</b> {store.address}. <b>Ish vaqti:</b> {store.hours}. Tovar tayyor bo'lgach, sizga qo'ng'iroq qilamiz.
+              <b>{t.checkout.addressLabel}</b> {store.address}. <b>{t.checkout.hoursLabel}</b> {store.hours}. {t.checkout.pickupNote}
             </p>
           )}
         </Step>
 
-        <Step n={3} title="To'lov usuli">
+        <Step n={3} title={t.checkout.payment}>
           <div className="grid gap-3">
-            <Option name="payment" value="cash" checked={payment === "cash"} onChange={() => setPayment("cash")} icon={<Banknote className="size-5" />} title="Naqd pul" hint="Tovarni qabul qilganda to'laysiz" />
-            <Option name="payment" value="card" checked={payment === "card"} onChange={() => setPayment("card")} icon={<CreditCard className="size-5" />} title="Bank kartasi" hint="Uzcard, Humo, Visa — kuryer terminali yoki do'konda" />
+            <Option name="payment" value="cash" checked={payment === "cash"} onChange={() => setPayment("cash")} icon={<Banknote className="size-5" />} title={t.checkout.cash} hint={t.checkout.cashHint} />
+            <Option name="payment" value="card" checked={payment === "card"} onChange={() => setPayment("card")} icon={<CreditCard className="size-5" />} title={t.checkout.card} hint={t.checkout.cardHint} />
             {store.installment.length ? (
-              <Option name="payment" value="installment" checked={payment === "installment"} onChange={() => setPayment("installment")} icon={<CalendarClock className="size-5" />} title="Muddatli to'lov" hint="Pasport bilan, qabul qilganda rasmiylashtiriladi" />
+              <Option name="payment" value="installment" checked={payment === "installment"} onChange={() => setPayment("installment")} icon={<CalendarClock className="size-5" />} title={t.checkout.installment} hint={t.checkout.installmentHint} />
             ) : null}
           </div>
           {payment === "installment" && quote ? (
             <fieldset className="mt-4">
-              <legend className="mb-2 text-sm font-semibold text-ink-800">Muddatni tanlang</legend>
+              <legend className="mb-2 text-sm font-semibold text-ink-800">{t.checkout.chooseTerm}</legend>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {quote.installment.map((p) => (
                   <label key={p.months} className={`cursor-pointer rounded-2xl border-2 p-3 text-center transition-colors ${months === p.months ? "border-ink-950 bg-lime-200" : "border-ink-100 hover:border-ink-300"}`}>
                     <input type="radio" name="months" className="sr-only" checked={months === p.months} onChange={() => setMonths(p.months)} />
-                    <span className="block font-display text-lg font-bold">{p.months} oy</span>
-                    <span className="block text-xs font-semibold text-ink-700">{formatMoney(Math.ceil((p.total + fee) / p.months))}/oy</span>
-                    <span className="block text-[11px] text-ink-500">{p.percent ? `+${p.percent}%` : "0% ustama"}</span>
+                    <span className="block font-display text-lg font-bold">{t.common.months(p.months)}</span>
+                    <span className="block text-xs font-semibold text-ink-700">{formatMoney(Math.ceil((p.total + fee) / p.months))}{t.checkout.perMonth}</span>
+                    <span className="block text-[11px] text-ink-500">{p.percent ? `+${p.percent}%` : t.checkout.noMarkup}</span>
                   </label>
                 ))}
               </div>
@@ -210,16 +212,16 @@ export function CheckoutForm({ store }: { store: Store }) {
           ) : null}
         </Step>
 
-        <Step n={4} title="Izoh (ixtiyoriy)">
-          <Field label="Operator yoki kuryer uchun izoh">
-            {(id) => <Textarea id={id} name="comment" maxLength={500} placeholder="Masalan: soat 18:00 dan keyin qo'ng'iroq qiling" />}
+        <Step n={4} title={t.checkout.comment}>
+          <Field label={t.checkout.commentLabel}>
+            {(id) => <Textarea id={id} name="comment" maxLength={500} placeholder={t.checkout.commentPlaceholder} />}
           </Field>
         </Step>
       </div>
 
-      <aside className="lg:sticky lg:top-40 lg:self-start">
+      <aside className="lg:sticky lg:top-6 lg:self-start">
         <div className="space-y-4 rounded-3xl bg-white p-5 sm:p-6">
-          <h2 className="font-display text-lg font-semibold">Buyurtmangiz · {count} ta</h2>
+          <h2 className="font-display text-lg font-semibold">{t.checkout.yourOrder(count)}</h2>
           <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">
             {lines.map((l) => {
               const q = quote?.items.find((i) => i.product_id === l.id);
@@ -241,39 +243,39 @@ export function CheckoutForm({ store }: { store: Store }) {
           </ul>
           <dl className="space-y-2.5 border-t border-ink-100 pt-4 text-sm">
             <div className="flex justify-between">
-              <dt className="text-ink-500">Tovarlar</dt>
+              <dt className="text-ink-500">{t.common.goods}</dt>
               <dd className="font-medium">{formatMoney(subtotal)}</dd>
             </div>
             {payment === "installment" && plan && plan.percent ? (
               <div className="flex justify-between">
-                <dt className="text-ink-500">Muddatli to'lov ustamasi ({plan.percent}%)</dt>
+                <dt className="text-ink-500">{t.checkout.markup(plan.percent)}</dt>
                 <dd className="font-medium">{formatMoney(plan.total - subtotal)}</dd>
               </div>
             ) : null}
             <div className="flex justify-between">
-              <dt className="text-ink-500">Yetkazish</dt>
-              <dd className="font-medium">{fee ? formatMoney(fee) : "Bepul"}</dd>
+              <dt className="text-ink-500">{t.common.delivery}</dt>
+              <dd className="font-medium">{fee ? formatMoney(fee) : t.common.free}</dd>
             </div>
             <div className="flex items-baseline justify-between border-t border-ink-100 pt-3">
-              <dt className="font-semibold">Jami</dt>
+              <dt className="font-semibold">{t.common.total}</dt>
               <dd className="font-display text-2xl font-bold text-ink-950">{formatMoney(total)}</dd>
             </div>
             {monthlyPay ? (
               <div className="flex justify-between rounded-xl bg-lime-200 px-3 py-2">
-                <dt className="font-semibold">Oylik to'lov</dt>
+                <dt className="font-semibold">{t.checkout.monthly}</dt>
                 <dd className="font-bold">
-                  {formatMoney(monthlyPay)} × {months} oy
+                  {formatMoney(monthlyPay)} × {t.common.months(months)}
                 </dd>
               </div>
             ) : null}
           </dl>
           {error ? <Alert>{error}</Alert> : null}
           <Button type="submit" size="lg" className="w-full" disabled={saving || !quote || problems.length > 0}>
-            {saving ? "Yuborilmoqda…" : "Buyurtmani tasdiqlash"}
+            {saving ? t.common.sending : t.checkout.submit}
           </Button>
           <p className="flex items-start gap-2 text-xs text-ink-500">
             <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-            Hozir hech narsa to'lamaysiz. Operator qo'ng'iroq qilib buyurtmani tasdiqlaydi, to'lov qabul qilganda.
+            {t.checkout.secure}
           </p>
         </div>
       </aside>

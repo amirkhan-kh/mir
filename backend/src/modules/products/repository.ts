@@ -1,20 +1,26 @@
 import type { Db } from "../../core/db.js";
+import { col, type Lang } from "../../core/i18n.js";
 
 export interface ProductInput {
   category_id: number;
   name: string;
+  name_ky: string;
   slug: string;
   sku: string | null;
   brand: string | null;
   short_description: string;
+  short_description_ky: string;
   description: string;
+  description_ky: string;
   price: number;
   old_price: number | null;
   stock: number;
   images: string[];
   specs: { label: string; value: string }[];
+  specs_ky: { label: string; value: string }[];
   warranty_months: number;
   badge: string | null;
+  badge_ky: string;
   is_featured: boolean;
   active: boolean;
 }
@@ -43,8 +49,11 @@ export const SORTS = {
   discount: "(COALESCE(p.old_price, p.price) - p.price) / NULLIF(COALESCE(p.old_price, p.price), 0) DESC, p.id",
 } as const;
 
-export const CARD = `p.id, p.slug, p.name, p.brand, p.price, p.old_price, p.images[1:2] AS images, p.stock,
-  p.badge, p.rating_avg, p.rating_count, p.sold_count, p.category_id`;
+export const card = (lang: Lang) => `p.id, p.slug, ${col(lang, "p.name")}, p.brand, p.price, p.old_price, p.images[1:2] AS images,
+  p.stock, ${col(lang, "p.badge")}, p.rating_avg, p.rating_count, p.sold_count, p.category_id`;
+
+const specs = (lang: Lang) =>
+  lang === "ky" ? "CASE WHEN jsonb_array_length(p.specs_ky) > 0 THEN p.specs_ky ELSE p.specs END AS specs" : "p.specs";
 
 /** Public filter: every user value goes through $n params; clauses are fixed strings. */
 function publicWhere(f: Omit<PublicFilter, "sort" | "limit" | "offset">) {
@@ -54,7 +63,7 @@ function publicWhere(f: Omit<PublicFilter, "sort" | "limit" | "offset">) {
     params.push(value);
     where.push(sql.replaceAll("$?", `$${params.length}`));
   };
-  if (f.q) add("(p.name ILIKE $? OR p.brand ILIKE $? OR p.sku ILIKE $?)", `%${f.q}%`);
+  if (f.q) add("(p.name ILIKE $? OR p.name_ky ILIKE $? OR p.brand ILIKE $? OR p.sku ILIKE $?)", `%${f.q}%`);
   if (f.category) add("c.slug = $?", f.category);
   if (f.brands.length) add("lower(p.brand) = ANY($?)", f.brands.map((b) => b.toLowerCase()));
   if (f.min !== null) add("p.price >= $?", f.min);
@@ -66,12 +75,12 @@ function publicWhere(f: Omit<PublicFilter, "sort" | "limit" | "offset">) {
   return { sql: where.join(" AND "), params };
 }
 
-export async function listPublic(db: Db, f: PublicFilter) {
+export async function listPublic(db: Db, f: PublicFilter, lang: Lang) {
   const { sql, params } = publicWhere(f);
   const n = params.length;
   const [items, total] = await Promise.all([
     db.query(
-      `SELECT ${CARD} FROM products p JOIN categories c ON c.id = p.category_id
+      `SELECT ${card(lang)} FROM products p JOIN categories c ON c.id = p.category_id
         WHERE ${sql} ORDER BY (p.stock > 0) DESC, ${SORTS[f.sort]} LIMIT $${n + 1} OFFSET $${n + 2}`,
       [...params, f.limit, f.offset],
     ),
@@ -97,9 +106,12 @@ export async function facets(db: Db, f: Omit<PublicFilter, "sort" | "limit" | "o
   return { brands: brands.rows, price: range.rows[0] };
 }
 
-export async function bySlug(db: Db, slug: string) {
+export async function bySlug(db: Db, slug: string, lang: Lang) {
   const { rows } = await db.query(
-    `SELECT p.*, c.name AS category_name, c.slug AS category_slug
+    `SELECT p.id, p.slug, ${col(lang, "p.name")}, p.brand, p.price, p.old_price, p.images, p.stock, ${col(lang, "p.badge")},
+            p.rating_avg, p.rating_count, p.sold_count, p.category_id, p.sku, ${col(lang, "p.short_description")},
+            ${col(lang, "p.description")}, ${specs(lang)}, p.warranty_months, p.is_featured,
+            ${col(lang, "c.name", "category_name")}, c.slug AS category_slug
        FROM products p JOIN categories c ON c.id = p.category_id
       WHERE p.slug = $1 AND p.active AND c.active`,
     [slug],
@@ -107,9 +119,9 @@ export async function bySlug(db: Db, slug: string) {
   return rows[0] ?? null;
 }
 
-export async function related(db: Db, categoryId: number, excludeId: number) {
+export async function related(db: Db, categoryId: number, excludeId: number, lang: Lang) {
   const { rows } = await db.query(
-    `SELECT ${CARD} FROM products p WHERE p.active AND p.category_id = $1 AND p.id <> $2
+    `SELECT ${card(lang)} FROM products p WHERE p.active AND p.category_id = $1 AND p.id <> $2
       ORDER BY (p.stock > 0) DESC, p.sold_count DESC LIMIT 10`,
     [categoryId, excludeId],
   );
@@ -157,11 +169,13 @@ export async function byId(db: Db, id: number) {
 }
 
 const FIELDS = [
-  "category_id", "name", "slug", "sku", "brand", "short_description", "description", "price", "old_price",
-  "stock", "images", "specs", "warranty_months", "badge", "is_featured", "active",
+  "category_id", "name", "name_ky", "slug", "sku", "brand", "short_description", "short_description_ky", "description",
+  "description_ky", "price", "old_price", "stock", "images", "specs", "specs_ky", "warranty_months", "badge", "badge_ky",
+  "is_featured", "active",
 ] as const;
 
-const values = (p: ProductInput) => FIELDS.map((f) => (f === "specs" ? JSON.stringify(p.specs) : p[f]));
+const values = (p: ProductInput) =>
+  FIELDS.map((f) => (f === "specs" || f === "specs_ky" ? JSON.stringify(p[f]) : p[f]));
 
 export async function insert(db: Db, p: ProductInput) {
   const { rows } = await db.query(

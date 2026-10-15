@@ -4,6 +4,7 @@ import { ChevronRight, LayoutGrid, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/shared/i18n/client";
 import type { Category } from "@/shared/lib/types";
 import { CategoryIcon } from "@/shared/ui/CategoryIcon";
 
@@ -11,6 +12,7 @@ export function CatalogMenu({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const t = useT();
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -38,7 +40,7 @@ export function CatalogMenu({ categories }: { categories: Category[] }) {
         className="flex h-12 items-center gap-2 rounded-2xl bg-ink-950 px-4 font-semibold text-white transition-colors hover:bg-ink-800"
       >
         {open ? <X className="size-5 text-lime-400" aria-hidden /> : <LayoutGrid className="size-5 text-lime-400" aria-hidden />}
-        Katalog
+        {t.nav.catalog}
       </button>
       {open ? (
         <div id="catalog-menu" className="absolute left-0 top-[calc(100%+10px)] z-50 w-[min(640px,80vw)] animate-fade-up rounded-3xl border border-ink-100 bg-white p-3 shadow-lift">
@@ -51,7 +53,7 @@ export function CatalogMenu({ categories }: { categories: Category[] }) {
                   </span>
                   <span className="flex-1">
                     <span className="block text-sm font-semibold text-ink-900">{c.name}</span>
-                    <span className="text-xs text-ink-500">{c.product_count} ta tovar</span>
+                    <span className="text-xs text-ink-500">{t.nav.productsCount(c.product_count)}</span>
                   </span>
                   <ChevronRight className="size-4 text-ink-300 group-hover:text-ink-700" aria-hidden />
                 </Link>
@@ -59,7 +61,7 @@ export function CatalogMenu({ categories }: { categories: Category[] }) {
             ))}
           </ul>
           <Link href="/katalog" className="mt-2 flex h-11 items-center justify-center rounded-2xl bg-ink-50 text-sm font-semibold text-ink-800 hover:bg-ink-100">
-            Barcha tovarlar
+            {t.nav.allProducts}
           </Link>
         </div>
       ) : null}

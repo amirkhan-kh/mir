@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useT } from "@/shared/i18n/client";
 
 export function Modal({
   open,
@@ -16,6 +17,7 @@ export function Modal({
   children: ReactNode;
   size?: "md" | "lg";
 }) {
+  const t = useT();
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -44,7 +46,7 @@ export function Modal({
             </h2>
             <button
               type="button"
-              aria-label="Yopish"
+              aria-label={t.common.close}
               onClick={onClose}
               className="grid size-9 place-items-center rounded-xl text-ink-500 hover:bg-ink-100 hover:text-ink-950"
             >
