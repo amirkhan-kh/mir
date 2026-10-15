@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mir
+      POSTGRES_PASSWORD: mir
+      POSTGRES_DB: mir
+    ports:
+      - "127.0.0.1:5440:5432"
+    volumes:
+      - mir_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir -d mir"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      PORT: 4010
+      DATABASE_URL: postgres://mir:mir@db:5432/mir
+      JWT_SECRET: ${JWT_SECRET:-dev-only-mir-secret-change-me-in-production}
+      CORS_ORIGIN: http://localhost:3010
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      SEED_DEMO: ${SEED_DEMO:-true}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - mir_uploads:/app/uploads
+    ports:
+      - "4010:4010"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        API_INTERNAL_URL: http://backend:4010
+    environment:
+      API_INTERNAL_URL: http://backend:4010
+    ports:
+      - "3010:3010"
+    depends_on:
+      - backend
+
+volumes:
+  mir_db:
+  mir_uploads:

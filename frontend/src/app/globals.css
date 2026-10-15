@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Mir palette: ink black + lime→leaf gradient taken from the brand logo. */
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-unbounded), var(--font-manrope), ui-sans-serif, sans-serif;
+
+  --color-ink-950: #0b0d0a;
+  --color-ink-900: #15180f;
+  --color-ink-800: #23271d;
+  --color-ink-700: #3a3f34;
+  --color-ink-600: #545a4d;
+  --color-ink-500: #6b7165;
+  --color-ink-400: #9aa093;
+  --color-ink-300: #c8ccc1;
+  --color-ink-200: #e0e3db;
+  --color-ink-100: #eef0ea;
+  --color-ink-50: #f6f7f3;
+
+  --color-lime-100: #f3fbd9;
+  --color-lime-200: #e6f6b0;
+  --color-lime-300: #d4ef6e;
+  --color-lime-400: #bde33f;
+  --color-lime-500: #a2d42b;
+  --color-lime-600: #84b81f;
+
+  --color-leaf-500: #4ea323;
+  --color-leaf-600: #3e8a1b;
+  --color-leaf-700: #2f6f14;
+  --color-leaf-800: #245510;
+
+  --color-flame-50: #fff1f0;
+  --color-flame-500: #e5484d;
+  --color-flame-600: #cd2b31;
+  --color-amber-50: #fff8e6;
+  --color-amber-600: #b25e09;
+
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  --shadow-card: 0 1px 2px rgb(11 13 10 / 0.04), 0 8px 24px -12px rgb(11 13 10 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(11 13 10 / 0.04), 0 18px 40px -16px rgb(11 13 10 / 0.22);
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 text-ink-900 antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-leaf-600;
+  }
+  ::selection {
+    @apply bg-lime-300 text-ink-950;
+  }
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+}
+
+@utility brand-gradient {
+  background-image: linear-gradient(120deg, var(--color-lime-300) 0%, var(--color-lime-500) 45%, var(--color-leaf-500) 100%);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
