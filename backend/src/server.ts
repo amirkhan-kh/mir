@@ -8,8 +8,8 @@ let ready: Promise<void> | null = null;
 
 /** Migrate + seed once per process; a failed attempt is retried on the next request. */
 function boot(): Promise<void> {
-  if (process.env.VERCEL && !process.env.DATABASE_URL) {
-    return Promise.reject(new Error("DATABASE_URL is not set in the Vercel project environment"));
+  if (process.env.VERCEL && !process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
+    return Promise.reject(new Error("DATABASE_URL (or POSTGRES_URL) is not set in the Vercel project environment"));
   }
   ready ??= migrate()
     .then(seed)

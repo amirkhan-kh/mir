@@ -4,7 +4,8 @@ const env = process.env;
 
 export const config = {
   port: Number(env.PORT ?? 4010),
-  databaseUrl: env.DATABASE_URL ?? "postgres://mir:mir@127.0.0.1:5440/mir",
+  // Vercel Postgres integrations (Neon, Supabase) may expose only POSTGRES_URL.
+  databaseUrl: env.DATABASE_URL ?? env.POSTGRES_URL ?? "postgres://mir:mir@127.0.0.1:5440/mir",
   jwtSecret: env.JWT_SECRET ?? "dev-only-mir-secret-change-me-in-production",
   corsOrigin: (env.CORS_ORIGIN ?? "http://localhost:3010").split(",").map((s) => s.trim()),
   adminUsername: env.ADMIN_USERNAME ?? "admin",
