@@ -12,17 +12,17 @@ export async function Header({ store, categories }: { store: Store; categories: 
   return (
     <header className="bg-white shadow-[0_1px_0_var(--color-ink-100)]">
       <div className="hidden bg-ink-950 text-[13px] text-ink-300 md:block">
-        <div className="mx-auto flex h-9 max-w-[1320px] items-center justify-between gap-6 px-6">
-          <p className="flex items-center gap-2">
-            <Truck className="size-4 text-lime-400" aria-hidden />
-            {store.delivery_note}
+        <div className="mx-auto flex h-9 max-w-[1320px] items-center justify-between gap-6 whitespace-nowrap px-6">
+          <p className="flex min-w-0 items-center gap-2">
+            <Truck className="size-4 shrink-0 text-lime-400" aria-hidden />
+            <span className="truncate">{store.delivery_note}</span>
           </p>
-          <div className="flex items-center gap-5">
+          <div className="flex shrink-0 items-center gap-5">
             <span className="flex items-center gap-1.5">
               <MapPin className="size-3.5" aria-hidden />
               {store.address}
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="hidden items-center gap-1.5 lg:flex">
               <Clock className="size-3.5" aria-hidden />
               {store.hours}
             </span>

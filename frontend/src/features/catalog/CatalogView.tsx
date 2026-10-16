@@ -27,7 +27,7 @@ function pick(sp: SearchParams) {
 export async function Breadcrumbs({ items }: { items: { href?: string; label: string }[] }) {
   const t = await getT();
   return (
-    <nav aria-label={t.nav.breadcrumbs} className="mb-4 text-sm text-ink-500">
+    <nav aria-label={t.nav.breadcrumbs} className="mb-3 text-sm text-ink-500">
       <ol className="flex flex-wrap items-center gap-1.5">
         {items.map((i, idx) => (
           <li key={idx} className="flex items-center gap-1.5">
@@ -71,18 +71,21 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
   return (
     <div>
       <Breadcrumbs items={[{ href: "/", label: t.nav.home }, { href: category ? "/katalog" : undefined, label: t.nav.catalog }, ...(category ? [{ label: category.name }] : [])]} />
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-950 sm:text-3xl">{title}</h1>
-          <p className="mt-1 text-sm text-ink-500">{t.nav.productsCount(data.total)}</p>
+      <div className="mb-3 flex items-end justify-between gap-3 sm:mb-4">
+        <h1 className="flex flex-wrap items-baseline gap-x-3 font-display text-2xl font-semibold tracking-tight text-ink-950 sm:text-3xl">
+          {title}
+          <span className="font-sans text-sm font-normal tracking-normal text-ink-500">{t.nav.productsCount(data.total)}</span>
+        </h1>
+        <div className="hidden shrink-0 lg:block">
+          <SortSelect />
         </div>
       </div>
 
       {!category && !q ? (
-        <ul className="scrollbar-none -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <ul className="scrollbar-none -mx-4 mb-3 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:mb-4 sm:px-0">
           {categories.filter((c) => c.product_count > 0).map((c) => (
             <li key={c.id} className="shrink-0">
-              <Link href={`/katalog/${c.slug}`} className="flex h-11 items-center gap-2 rounded-xl bg-white px-3.5 text-sm font-semibold text-ink-800 ring-1 ring-ink-100 hover:ring-ink-300">
+              <Link href={`/katalog/${c.slug}`} className="flex h-10 items-center gap-2 whitespace-nowrap rounded-xl bg-white px-3 text-sm font-semibold text-ink-800 ring-1 ring-ink-100 hover:ring-ink-300">
                 <CategoryIcon name={c.icon} className="size-4.5 text-leaf-700" />
                 {c.name}
               </Link>
@@ -91,15 +94,15 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
         </ul>
       ) : null}
 
-      <div className="flex gap-6">
+      <div className="flex gap-5">
         <CatalogFilters facets={data.facets} />
         <div className="min-w-0 flex-1">
-          <div className="mb-4 flex items-center justify-between gap-3 lg:justify-end">
+          <div className="mb-3 flex items-center justify-between gap-3 lg:hidden">
             <MobileFilters facets={data.facets} />
             <SortSelect />
           </div>
           {data.items.length ? (
-            <ProductGrid products={data.items} plan={longestPlan(store.installment)} preloadFirst={4} />
+            <ProductGrid products={data.items} plan={longestPlan(store.installment)} preloadFirst={4} layout="sidebar" />
           ) : (
             <div className="rounded-3xl bg-white">
               <Empty
@@ -115,7 +118,7 @@ export async function CatalogView({ sp, category, categories }: { sp: SearchPara
             </div>
           )}
           {pages > 1 ? (
-            <nav aria-label={t.catalog.pages} className="mt-8 flex items-center justify-center gap-2">
+            <nav aria-label={t.catalog.pages} className="mt-6 flex items-center justify-center gap-2">
               {page > 1 ? (
                 <Link href={pageHref(page - 1)} aria-label={t.common.prevPage} className="grid size-10 place-items-center rounded-xl bg-white ring-1 ring-ink-200 hover:ring-ink-400">
                   <ChevronLeft className="size-4" />

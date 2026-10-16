@@ -51,15 +51,15 @@ export default async function ProductPage({ params }: Props) {
   };
 
   return (
-    <div className="space-y-10 sm:space-y-14">
+    <div className="space-y-6 sm:space-y-8 lg:space-y-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div>
         <Breadcrumbs items={[{ href: "/", label: t.nav.home }, { href: "/katalog", label: t.nav.catalog }, { href: `/katalog/${p.category_slug}`, label: p.category_name }, { label: p.name }]} />
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_360px] lg:gap-8">
+        <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_360px]">
           <ProductGallery images={p.images} name={p.name} />
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div>
               {p.brand ? <p className="mb-1 text-sm font-semibold uppercase tracking-wider text-leaf-700">{p.brand}</p> : null}
               <div className="flex items-start gap-3">
@@ -106,9 +106,9 @@ export default async function ProductPage({ params }: Props) {
             ) : null}
           </div>
 
-          <div className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+          <div className="grid gap-4 md:col-span-2 md:grid-cols-2 lg:sticky lg:top-4 lg:col-span-1 lg:grid-cols-1 lg:self-start">
             <BuyBox product={p} plans={store.installment} />
-            <div className="space-y-3 rounded-3xl bg-white p-5 ring-1 ring-ink-100">
+            <div className="space-y-3 self-start rounded-3xl bg-white p-4 ring-1 ring-ink-100 sm:p-5">
               <h2 className="font-display text-base font-semibold">{t.product.delivery}</h2>
               <div className="flex gap-3">
                 <Truck className="mt-0.5 size-5 shrink-0 text-leaf-600" aria-hidden />
@@ -131,13 +131,13 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </div>
 
-      <section aria-labelledby="tavsif" className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-3xl bg-white p-6">
-          <h2 id="tavsif" className="mb-4 font-display text-xl font-semibold">{t.product.description}</h2>
+      <section aria-labelledby="tavsif" className="grid gap-3 sm:gap-4 lg:grid-cols-2">
+        <div className="rounded-3xl bg-white p-4 sm:p-6">
+          <h2 id="tavsif" className="mb-3 font-display text-lg font-semibold sm:text-xl">{t.product.description}</h2>
           <div className="space-y-3 whitespace-pre-line text-[15px] leading-relaxed text-ink-700">{p.description || p.short_description}</div>
         </div>
-        <div id="xususiyatlar" className="scroll-mt-40 rounded-3xl bg-white p-6">
-          <h2 className="mb-4 font-display text-xl font-semibold">{t.product.specs}</h2>
+        <div id="xususiyatlar" className="scroll-mt-6 rounded-3xl bg-white p-4 sm:p-6">
+          <h2 className="mb-3 font-display text-lg font-semibold sm:text-xl">{t.product.specs}</h2>
           <dl className="divide-y divide-ink-100 text-sm">
             {p.specs.map((s) => (
               <div key={s.label} className="grid grid-cols-2 gap-4 py-2.5">
@@ -149,8 +149,8 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </section>
 
-      <section id="sharhlar" aria-labelledby="sharhlar-title" className="scroll-mt-40">
-        <h2 id="sharhlar-title" className="mb-5 font-display text-xl font-semibold sm:text-2xl">
+      <section id="sharhlar" aria-labelledby="sharhlar-title" className="scroll-mt-6">
+        <h2 id="sharhlar-title" className="mb-3 font-display text-xl font-semibold sm:text-2xl">
           {t.product.reviewsTitle}
         </h2>
         <Reviews product={p} />

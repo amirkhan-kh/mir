@@ -80,7 +80,7 @@ function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void })
   const active = ["brand", "min", "max", "in_stock", "discount", "featured"].some((k) => params.get(k));
 
   return (
-    <div className={`space-y-6 ${pending ? "opacity-60" : ""}`}>
+    <div className={`space-y-5 ${pending ? "opacity-60" : ""}`}>
       <div className="space-y-1">
         {flag("in_stock", t.catalog.inStock)}
         {flag("discount", t.catalog.withDiscount)}
@@ -133,8 +133,8 @@ function FilterBody({ facets, onDone }: { facets: Facets; onDone?: () => void })
 export function CatalogFilters({ facets }: { facets: Facets }) {
   const t = useT();
   return (
-    <aside aria-label={t.catalog.filters} className="hidden w-64 shrink-0 lg:block">
-      <div className="sticky top-6 rounded-2xl bg-white p-5">
+    <aside aria-label={t.catalog.filters} className="hidden w-60 shrink-0 lg:block">
+      <div className="sticky top-4 rounded-2xl bg-white p-4">
         <FilterBody facets={facets} />
       </div>
     </aside>

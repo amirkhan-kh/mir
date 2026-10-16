@@ -73,7 +73,8 @@ export function OrderTracker({ number, store }: { number: string; store: Store }
       setState("form");
       return;
     }
-    setFresh(Boolean(saved.fresh));
+    // Functional update: the effect runs twice in dev (StrictMode) and the second read already sees fresh=false.
+    if (saved.fresh) setFresh(true);
     if (saved.fresh) sessionStorage.setItem(KEY, JSON.stringify({ ...saved, fresh: false }));
     api<Order>(`/public/orders/${encodeURIComponent(number)}?phone=${encodeURIComponent(saved.phone)}`)
       .then((o) => {

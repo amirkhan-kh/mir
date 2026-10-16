@@ -25,6 +25,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       SEED_DEMO: ${SEED_DEMO:-true}
+      CHECKOUT_RATE_LIMIT: ${CHECKOUT_RATE_LIMIT:-10}
       UPLOAD_DIR: /app/uploads
     volumes:
       - mir_uploads:/app/uploads

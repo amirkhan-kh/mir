@@ -37,8 +37,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
 }
 
 export async function POST(req: NextRequest, ctx: Ctx) {
-  const path = await pathOf(req, ctx);
-  if (path === "/public/orders/quote") {
+  if ((await pathOf(req, ctx)).split("?")[0] === "/public/orders/quote") {
     const json = (await req.json().catch(() => null)) as { items?: { product_id: number; qty: number }[] } | null;
     return NextResponse.json(mockQuote(Array.isArray(json?.items) ? json.items.slice(0, 50) : [], langOf(req)));
   }

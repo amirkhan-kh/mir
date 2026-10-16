@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { allow } from "../../core/auth.js";
+import { config } from "../../core/config.js";
 import { pool } from "../../core/db.js";
 import { langOf } from "../../core/i18n.js";
 import { idParam, pageOf, parse, zmsg } from "../../core/http.js";
@@ -48,7 +49,7 @@ ordersPublic.post("/quote", async (req, res) => {
   res.json(await service.quote(body.items, langOf(req)));
 });
 
-ordersPublic.post("/", rateLimit("checkout", 10, 10 * 60_000), async (req, res) => {
+ordersPublic.post("/", rateLimit("checkout", config.checkoutRateMax, 10 * 60_000), async (req, res) => {
   const order = await service.create(parse(checkoutSchema, req.body));
   res.status(201).json({ number: order.number, total: order.total, status: order.status, phone: order.phone });
 });

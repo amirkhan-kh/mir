@@ -51,20 +51,20 @@ function Slide({ b, active, first }: { b: Banner; active: boolean; first: boolea
   const body = (
     <div className={`relative flex h-full w-full overflow-hidden rounded-3xl ${t.wrap}`}>
       <div className={`pointer-events-none absolute -right-16 top-1/2 size-[420px] -translate-y-1/2 rounded-full blur-3xl ${t.glow}`} aria-hidden />
-      <div className="relative z-10 flex w-full flex-col justify-between gap-4 p-6 sm:p-10 md:w-[55%] md:justify-center md:gap-6 md:pl-20">
-        <div className="space-y-3 md:space-y-4">
+      <div className="relative z-10 flex w-full flex-col justify-between gap-4 p-5 pb-10 sm:p-8 sm:pb-10 md:w-[55%] md:justify-center md:gap-6 md:px-16 md:py-10">
+        <div className="space-y-2 md:space-y-4">
           <h2 className={`font-display text-2xl font-bold leading-[1.1] tracking-tight text-balance sm:text-4xl lg:text-[44px] ${t.title}`}>{b.title}</h2>
           {b.subtitle ? <p className={`max-w-md text-sm leading-relaxed sm:text-base ${t.sub}`}>{b.subtitle}</p> : null}
         </div>
         {b.cta ? (
-          <span className={`inline-flex h-12 w-fit items-center gap-2 rounded-2xl px-5 font-semibold transition-colors ${t.cta}`}>
+          <span className={`inline-flex h-11 w-fit items-center gap-2 rounded-2xl px-5 font-semibold transition-colors md:h-12 ${t.cta}`}>
             {b.cta}
             <ArrowRight className="size-4" aria-hidden />
           </span>
         ) : null}
       </div>
       {b.image ? (
-        <div className="absolute bottom-20 right-0 h-[40%] w-full md:bottom-0 md:h-full md:w-[48%]">
+        <div className="absolute bottom-[4.5rem] right-0 h-[42%] w-full md:bottom-0 md:h-full md:w-[48%]">
           <Swoosh className="absolute bottom-[6%] left-1/2 w-[92%] -translate-x-1/2 opacity-90" />
           <Image
             src={b.image}
@@ -112,7 +112,7 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
       onBlurCapture={() => setPaused(false)}
     >
       <div className="overflow-hidden rounded-3xl">
-        <ul className="flex h-[440px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] sm:h-[400px]" style={{ transform: `translateX(-${index * 100}%)` }}>
+        <ul className="flex h-[380px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] sm:h-[360px] lg:h-[380px]" style={{ transform: `translateX(-${index * 100}%)` }}>
           {banners.map((b, i) => (
             <li key={b.id} className="h-full w-full shrink-0" aria-roledescription={t.hero.slide} aria-label={`${i + 1} / ${count}`} aria-hidden={i !== index}>
               <Slide b={b} active={i === index} first={i === 0} />
@@ -128,7 +128,7 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
           <button type="button" aria-label={t.hero.next} onClick={() => go(index + 1)} className="absolute right-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink-900 shadow-card backdrop-blur hover:bg-white md:grid">
             <ChevronRight className="size-5" />
           </button>
-          <div className="absolute bottom-4 left-6 flex gap-1.5 sm:left-10">
+          <div className="absolute bottom-4 left-5 flex gap-1.5 sm:left-8 md:left-16">
             {banners.map((b, i) => (
               <button
                 key={b.id}

@@ -13,10 +13,10 @@
 - [ ] 2.2 Telegram notification to staff on new order.
 - [ ] 2.3 Online payment (Payme / Click) for card checkout.
 - [ ] 3.1 Lighthouse 100 on `/`, `/mahsulot/[slug]`, `/login`.
-- [ ] 3.2 Named tests (checkout stock decrement, cancel restore, idempotency).
+- [x] 3.2 Named tests (checkout stock decrement, cancel restore, idempotency) — `frontend/e2e/api.spec.ts` against the real backend (`npm run test:e2e:backend`), plus price snapshot, state machine, 401/403/422/429 rows.
 - [ ] 3.3 Deploy (VPS) — remove default admin, HTTPS. Vercel Services config ready (root `vercel.json`: frontend + backend, `BACKEND_URL` binding, Blob uploads); managed PostgreSQL + Blob store + live deploy still open.
-- [ ] 3.4a E2E setup: Playwright config, fixtures, factories, global-setup + `AUTH-*`, `G-*` rows (`docs/TESTING.md`).
-- [ ] 3.4b E2E P0 shop: `CART-*`, `CHK-*`, `TRK-*`, `ORD-*`.
+- [x] 3.4a E2E setup: Playwright config (mock + backend stacks), fixtures (console/5xx guard, catalog, shopper, unique), factories, global-setup + `AUTH-*` and `G-01/03` rows. Run: `npm run test:e2e` (mock) / `npm run test:e2e:backend` (real API; raise `CHECKOUT_RATE_LIMIT` in compose).
+- [~] 3.4b E2E P0 shop: `CART-*`, `CHK-*`, `TRK-*` done (mock + backend, 3 repeats, 0 flaky); `ORD-*` admin UI rows still open.
 - [ ] 3.4c E2E P1: `SHOP-*`, `PDP-*`, `PRD-*`, `CAT-*`, `BNR-*`, `DSH-*` + their `L*` rows.
 - [ ] 3.4d E2E P2: `REV-*`, `STF-*`, `SET-*`.
 - [ ] 3.4e API rows: `API-AUTH`, `API-<MOD>` for every mutating route + invariant break attempts.
@@ -25,3 +25,4 @@
 - [x] 4.3 Storefront strings → dictionaries (header, home, catalog, product, cart, checkout, order, tracking, login, 404, SEO metadata).
 - [x] 4.4 Admin strings → dictionaries (shell, dashboard, orders, products, categories, banners, reviews, staff, settings).
 - [x] 4.5 Backend error/validation messages (zod + `core/http.ts`) in RU/KY by request lang; mock API messages too.
+- [x] 4.6 Storefront density pass: card price block fixed-height (old price above, price never wraps, CTA aligned per row); grid columns tuned per breakpoint (`ProductGrid layout="full" | "sidebar"`); home rails show only complete rows; tighter section rhythm (hero, categories, benefits, promo); catalog sort moved into title row on lg+; product page 2-column on tablet; mobile cart overflow fixed; mock `/public/orders/quote?lang=` 503 fixed. Verified by layout audit (7 widths 360–1440 × 7 pages × 3 runs: overflow, price wrap, CTA alignment, half rows, console errors).

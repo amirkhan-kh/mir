@@ -14,17 +14,17 @@ export async function CategoryTiles({ categories }: { categories: Category[] }) 
       <h2 id="cat-title" className="sr-only">
         {t.nav.categories}
       </h2>
-      <ul className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 md:grid-cols-6">
+      <ul className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:px-0 md:grid-cols-6">
         {categories.map((c) => (
           <li key={c.id} className="shrink-0">
             <Link
               href={`/katalog/${c.slug}`}
-              className="group flex h-full w-28 flex-col items-center gap-2.5 rounded-2xl bg-white p-3 text-center transition-all hover:-translate-y-0.5 hover:shadow-card sm:w-auto sm:p-4"
+              className="group flex h-full w-24 flex-col items-center gap-2 rounded-2xl bg-white p-2.5 text-center transition-all hover:-translate-y-0.5 hover:shadow-card sm:w-auto sm:p-3"
             >
-              <span className="grid size-14 place-items-center rounded-2xl bg-lime-100 text-leaf-700 transition-colors group-hover:bg-lime-400 group-hover:text-ink-950">
+              <span className="grid size-12 place-items-center rounded-xl bg-lime-100 text-leaf-700 transition-colors group-hover:bg-lime-400 group-hover:text-ink-950">
                 <CategoryIcon name={c.icon} className="size-6" />
               </span>
-              <span className="text-[13px] font-semibold leading-tight text-ink-900">{c.name}</span>
+              <span className="text-xs font-semibold leading-tight text-ink-900 sm:text-[13px]">{c.name}</span>
             </Link>
           </li>
         ))}
@@ -45,18 +45,26 @@ export async function Benefits({ store }: { store: Store }) {
   return (
     <section aria-label={t.home.benefits} className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
       {items.map((i) => (
-        <div key={i.title} className="flex items-center gap-3 rounded-2xl bg-white p-3.5 sm:p-4">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-ink-950 text-lime-400">
-            <i.icon className="size-5" aria-hidden />
+        <div key={i.title} className="flex flex-col gap-2 rounded-2xl bg-white p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-ink-950 text-lime-400 sm:size-11">
+            <i.icon className="size-4.5 sm:size-5" aria-hidden />
           </span>
-          <span>
-            <span className="block text-sm font-semibold text-ink-950">{i.title}</span>
-            <span className="block text-xs leading-snug text-ink-500">{i.text}</span>
+          <span className="min-w-0">
+            <span className="block text-[13px] font-semibold leading-tight text-ink-950 sm:text-sm">{i.title}</span>
+            <span className="mt-0.5 block text-xs leading-snug text-ink-500">{i.text}</span>
           </span>
         </div>
       ))}
     </section>
   );
+}
+
+/** Items that fill complete rows at `cols` columns (a lone half-row leaves a dead zone). */
+const fullRows = (n: number, cols: number) => (n <= cols ? n : n - (n % cols));
+
+/** Mobile scrolls horizontally (all items); sm/md/xl grids (3/4/5 cols) show only complete rows. */
+function railVisibility(i: number, n: number) {
+  return [i < fullRows(n, 3) ? "sm:block" : "sm:hidden", i < fullRows(n, 4) ? "md:block" : "md:hidden", i < fullRows(n, 5) ? "xl:block" : "xl:hidden"].join(" ");
 }
 
 export async function ProductRail({
@@ -76,8 +84,8 @@ export async function ProductRail({
   const t = await getT();
   return (
     <section aria-labelledby={`rail-${href}`}>
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <h2 id={`rail-${href}`} className="flex items-center gap-2.5 font-display text-xl font-semibold tracking-tight text-ink-950 sm:text-2xl">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <h2 id={`rail-${href}`} className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-ink-950 sm:text-2xl">
           {accent ? <span className="rounded-lg bg-flame-500 px-2 py-0.5 text-sm font-bold text-white">{accent}</span> : null}
           {title}
         </h2>
@@ -86,9 +94,9 @@ export async function ProductRail({
           <ArrowRight className="size-4" aria-hidden />
         </Link>
       </div>
-      <ul className="scrollbar-none -mx-4 flex snap-x gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:px-0 lg:grid-cols-4 xl:grid-cols-5">
-        {products.map((p) => (
-          <li key={p.id} className="w-[46vw] max-w-56 shrink-0 snap-start sm:w-auto sm:max-w-none">
+      <ul className="scrollbar-none -mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:px-0 md:grid-cols-4 xl:grid-cols-5">
+        {products.map((p, i) => (
+          <li key={p.id} className={`w-[44vw] max-w-52 shrink-0 snap-start sm:w-auto sm:max-w-none ${railVisibility(i, products.length)}`}>
             <ProductCard product={p} plan={plan} />
           </li>
         ))}
@@ -101,12 +109,12 @@ export async function PromoBanners({ banners }: { banners: Banner[] }) {
   if (!banners.length) return null;
   const t = await getT();
   return (
-    <section aria-label={t.home.promo} className="grid gap-3 md:grid-cols-2">
+    <section aria-label={t.home.promo} className="grid gap-2 sm:gap-3 md:grid-cols-2">
       {banners.map((b) => {
         const dark = b.theme === "dark";
         const cls = dark ? "bg-ink-950 text-white" : b.theme === "lime" ? "brand-gradient text-ink-950" : "bg-white text-ink-950";
         const inner = (
-          <div className={`group relative flex h-48 overflow-hidden rounded-3xl p-6 sm:h-56 sm:p-8 ${cls}`}>
+          <div className={`group relative flex h-44 overflow-hidden rounded-3xl p-5 sm:h-52 sm:p-7 ${cls}`}>
             <div className="relative z-10 flex max-w-[58%] flex-col justify-between">
               <div>
                 <h3 className="font-display text-xl font-bold leading-tight sm:text-2xl">{b.title}</h3>

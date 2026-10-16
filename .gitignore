@@ -17,3 +17,5 @@ backend/uploads/
 
 playwright-report/
 test-results/
+
+frontend/e2e/.auth/

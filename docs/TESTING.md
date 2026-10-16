@@ -68,8 +68,12 @@ export default defineConfig({
 });
 ```
 
-Scripts in `frontend/package.json`: `"test:e2e": "playwright test"`, `"test:e2e:ui": "playwright test --ui"`.
-Stack: `docker compose up --build -d` (fresh: needs permit for `down -v`).
+Scripts in `frontend/package.json`: `"test:e2e": "playwright test"`, `"test:e2e:ui": "playwright test --ui"`, `"test:e2e:backend": "E2E_BACKEND=1 playwright test"`.
+
+Two stacks (see `playwright.config.ts`):
+- Default = **mock mode**: config boots `MOCK_API=1 next dev -p 3011` itself, no Docker needed; `@backend`-tagged tests are excluded.
+- `E2E_BACKEND=1` = **real API**: start `CHECKOUT_RATE_LIMIT=100000 docker compose up --build -d db backend` first (raised limit because all e2e checkouts share one IP), config boots the frontend on :3012 against `http://localhost:4010`; the whole suite runs, including `@backend`.
+- If browsers are missing: `npx playwright install chromium` (set `PLAYWRIGHT_BROWSERS_PATH=~/Library/Caches/ms-playwright` when the sandbox overrides it).
 
 ## Writing rules
 

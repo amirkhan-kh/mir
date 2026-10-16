@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = await getLang();
   return (
-    <html lang={lang} className={`${manrope.variable} ${unbounded.variable}`}>
+    <html lang={lang} data-scroll-behavior="smooth" className={`${manrope.variable} ${unbounded.variable}`}>
       <body className="min-h-dvh font-sans">
         <LangProvider lang={lang}>{children}</LangProvider>
       </body>

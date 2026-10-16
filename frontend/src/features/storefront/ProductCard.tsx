@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AddToCartButton, FavoriteButton } from "@/features/cart/CartButtons";
 import { useT } from "@/shared/i18n/client";
-import { discountPercent, formatMoney } from "@/shared/lib/format";
+import { CURRENCY, discountPercent, formatMoney, formatNumber } from "@/shared/lib/format";
 import { monthly } from "@/shared/lib/installment";
 import type { InstallmentPlan, ProductCard as Product } from "@/shared/lib/types";
 
@@ -24,7 +24,7 @@ export function ProductCard({ product: p, plan, preload = false }: { product: Pr
               alt={p.name}
               fill
               preload={preload}
-              sizes="(min-width: 1280px) 240px, (min-width: 768px) 30vw, 50vw"
+              sizes="(min-width: 1280px) 240px, (min-width: 640px) 33vw, 50vw"
               className={`object-contain mix-blend-multiply transition duration-500 ${img2 ? "group-hover:opacity-0" : "group-hover:scale-105"} ${out ? "opacity-50 grayscale" : ""}`}
             />
             {img2 ? (
@@ -50,11 +50,11 @@ export function ProductCard({ product: p, plan, preload = false }: { product: Pr
       </Link>
       <FavoriteButton id={p.id} name={p.name} className="absolute right-2 top-2" />
 
-      <div className="flex flex-1 flex-col gap-1 px-2 pb-2 pt-2">
+      <div className="flex flex-1 flex-col gap-1 p-2">
         <Link href={`/mahsulot/${p.slug}`} className="line-clamp-2 min-h-9 text-[13px] font-medium leading-[18px] text-ink-900 hover:text-leaf-700">
           {p.name}
         </Link>
-        <p className="flex items-center gap-1 text-[11px] text-ink-500">
+        <p className="flex h-4 items-center gap-1 text-[11px] text-ink-500">
           {p.rating_count > 0 ? (
             <>
               <Star className="size-3.5 fill-amber-400 text-amber-400" aria-hidden />
@@ -66,15 +66,17 @@ export function ProductCard({ product: p, plan, preload = false }: { product: Pr
           )}
         </p>
         {plan && !out ? (
-          <p className="w-fit rounded bg-lime-200 px-1 text-[11px] font-semibold leading-[18px] text-ink-900">
+          <p className="w-fit max-w-full truncate rounded bg-lime-200 px-1 text-[11px] font-semibold leading-[18px] text-ink-900">
             {formatMoney(monthly(p.price, plan))} {t.card.perMonth(plan.months)}
           </p>
         ) : null}
-        <p className="mt-auto flex flex-wrap items-baseline gap-x-1.5">
-          <span className="font-display text-base font-semibold tracking-tight text-ink-950">{formatMoney(p.price)}</span>
-          {p.old_price ? <span className="text-[11px] text-ink-400 line-through">{formatMoney(p.old_price)}</span> : null}
-        </p>
-        <div className="pt-1">
+        <div className="mt-auto flex flex-col gap-1.5">
+          <div>
+            <p className="h-4 text-[11px] leading-4 text-ink-400">{p.old_price ? <s>{formatMoney(p.old_price)}</s> : null}</p>
+            <p className="font-display text-sm font-bold leading-5 tracking-tight text-ink-950 lg:text-base">
+              <span className="whitespace-nowrap">{formatNumber(p.price)}</span> <span className="text-[11px] font-semibold lg:text-xs">{CURRENCY}</span>
+            </p>
+          </div>
           <AddToCartButton product={p} />
         </div>
       </div>
@@ -82,9 +84,25 @@ export function ProductCard({ product: p, plan, preload = false }: { product: Pr
   );
 }
 
-export function ProductGrid({ products, plan, preloadFirst = 0 }: { products: Product[]; plan: InstallmentPlan | null; preloadFirst?: number }) {
+/** Column counts keep cards ≥ ~165px wide so price + CTA never wrap. "sidebar" = next to the lg+ filter column. */
+const GRID_COLS = {
+  full: "sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5",
+  sidebar: "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5",
+};
+
+export function ProductGrid({
+  products,
+  plan,
+  preloadFirst = 0,
+  layout = "full",
+}: {
+  products: Product[];
+  plan: InstallmentPlan | null;
+  preloadFirst?: number;
+  layout?: keyof typeof GRID_COLS;
+}) {
   return (
-    <ul className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <ul className={`grid grid-cols-2 gap-2 sm:gap-3 ${GRID_COLS[layout]}`}>
       {products.map((p, i) => (
         <li key={p.id}>
           <ProductCard product={p} plan={plan} preload={i < preloadFirst} />

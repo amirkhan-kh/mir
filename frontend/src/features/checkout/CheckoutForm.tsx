@@ -219,7 +219,7 @@ export function CheckoutForm({ store }: { store: Store }) {
         </Step>
       </div>
 
-      <aside className="lg:sticky lg:top-6 lg:self-start">
+      <aside className="lg:sticky lg:top-4 lg:self-start">
         <div className="space-y-4 rounded-3xl bg-white p-5 sm:p-6">
           <h2 className="font-display text-lg font-semibold">{t.checkout.yourOrder(count)}</h2>
           <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">

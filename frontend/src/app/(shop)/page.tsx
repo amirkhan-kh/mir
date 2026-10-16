@@ -20,7 +20,7 @@ export default async function HomePage() {
   const promo = (banners ?? []).filter((b) => b.placement === "promo");
 
   return (
-    <div className="space-y-8 sm:space-y-12">
+    <div className="space-y-6 sm:space-y-8 lg:space-y-10">
       <h1 className="sr-only">{t.meta.h1}</h1>
       <HeroCarousel banners={hero} />
       <CategoryTiles categories={(categories ?? []).filter((c) => c.product_count > 0)} />

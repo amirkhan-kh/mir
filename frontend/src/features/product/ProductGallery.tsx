@@ -19,7 +19,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
     );
   }
   return (
-    <div className="flex flex-col-reverse gap-3 md:flex-row">
+    <div className="flex flex-col-reverse gap-2 md:flex-row md:gap-3">
       {count > 1 ? (
         <ul className="scrollbar-none flex gap-2 overflow-x-auto md:max-h-[520px] md:flex-col md:overflow-y-auto" aria-label={t.product.images}>
           {images.map((src, i) => (
@@ -45,7 +45,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
         }}
       >
         <div className="brand-gradient absolute inset-x-[15%] bottom-[8%] h-[18%] rounded-[100%] opacity-25 blur-2xl" aria-hidden />
-        <Image key={images[index]} src={images[index]} alt={name} fill preload sizes="(min-width: 1024px) 520px, 100vw" className="animate-fade-up object-contain p-8 mix-blend-multiply" />
+        <Image key={images[index]} src={images[index]} alt={name} fill preload sizes="(min-width: 1024px) 520px, 100vw" className="animate-fade-up object-contain p-4 mix-blend-multiply sm:p-6" />
         {count > 1 ? (
           <>
             <button type="button" aria-label={t.product.prevImage} onClick={() => go(index - 1)} className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white text-ink-900 shadow-card transition hover:scale-105">

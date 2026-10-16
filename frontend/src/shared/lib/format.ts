@@ -2,10 +2,13 @@ import type { Dict } from "@/shared/i18n/dict";
 
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 
-/** 9490000 → "9 490 000 сум" (same currency word in Russian and Kyrgyz). */
-export const formatMoney = (n: number) => `${money.format(Math.round(n)).replace(/\u00a0|\u202f/g, " ")} сум`;
+/** Same currency word in Russian and Kyrgyz. */
+export const CURRENCY = "сум";
 
-export const formatNumber = (n: number) => money.format(n).replace(/\u00a0|\u202f/g, " ");
+export const formatNumber = (n: number) => money.format(Math.round(n)).replace(/\u00a0|\u202f/g, " ");
+
+/** 9490000 → "9 490 000 сум" */
+export const formatMoney = (n: number) => `${formatNumber(n)} ${CURRENCY}`;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

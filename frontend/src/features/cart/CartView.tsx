@@ -34,7 +34,7 @@ export function CartView() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+    <div className="grid grid-cols-1 items-start gap-3 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
       <section aria-label={t.cart.items} className="rounded-3xl bg-white p-2 sm:p-4">
         <div className="flex items-center justify-between px-2 pb-2 pt-1">
           <p className="text-sm text-ink-500">{t.cart.count(count)}</p>
@@ -51,12 +51,14 @@ export function CartView() {
             const q = quote?.items.find((i) => i.product_id === l.id);
             const max = Math.min(99, q?.stock ?? l.stock);
             return (
-              <li key={l.id} className="flex gap-3 p-2 py-4 sm:gap-4">
-                <Link href={`/mahsulot/${l.slug}`} className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-ink-50 sm:size-28">
+              <li key={l.id} className="flex gap-3 p-2 py-3 sm:gap-4">
+                <Link href={`/mahsulot/${l.slug}`} className="relative size-20 shrink-0 overflow-hidden rounded-2xl bg-ink-50 sm:size-24">
                   {l.image ? (
                     <Image src={l.image} alt={l.name} fill sizes="112px" className="object-contain p-2 mix-blend-multiply" />
                   ) : (
-                    <ImageOff className="m-auto mt-9 size-6 text-ink-300" aria-hidden />
+                    <span className="grid h-full place-items-center text-ink-300">
+                      <ImageOff className="size-6" aria-hidden />
+                    </span>
                   )}
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start">
@@ -72,10 +74,10 @@ export function CartView() {
                       </p>
                     ) : null}
                   </div>
-                  <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
-                    <p className="font-display text-lg font-semibold text-ink-950">{formatMoney(l.price * l.qty)}</p>
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 sm:flex-col sm:flex-nowrap sm:items-end">
+                    <p className="whitespace-nowrap font-display text-base font-semibold text-ink-950 sm:text-lg">{formatMoney(l.price * l.qty)}</p>
                     <div className="flex items-center gap-2">
-                      <div className="w-32">
+                      <div className="w-28 sm:w-32">
                         <QtyStepper id={l.id} qty={l.qty} max={Math.max(1, max)} name={l.name} size="sm" />
                       </div>
                       <button type="button" aria-label={t.cart.remove(l.name)} onClick={() => removeFromCart(l.id)} className="grid size-10 place-items-center rounded-xl text-ink-400 hover:bg-flame-50 hover:text-flame-600">
@@ -90,8 +92,8 @@ export function CartView() {
         </ul>
       </section>
 
-      <aside aria-label={t.cart.summary} className="lg:sticky lg:top-6 lg:self-start">
-        <div className="space-y-4 rounded-3xl bg-white p-5 sm:p-6">
+      <aside aria-label={t.cart.summary} className="lg:sticky lg:top-4">
+        <div className="space-y-4 rounded-3xl bg-white p-4 sm:p-5">
           <h2 className="font-display text-lg font-semibold">{t.cart.yourOrder}</h2>
           {freeFrom > 0 ? (
             <div className="rounded-2xl bg-ink-50 p-3.5">
@@ -121,7 +123,7 @@ export function CartView() {
             </div>
             <div className="flex items-baseline justify-between border-t border-ink-100 pt-3">
               <dt className="font-semibold text-ink-900">{t.common.total}</dt>
-              <dd className="font-display text-2xl font-bold text-ink-950">{formatMoney(subtotal + (quote?.delivery_fee ?? 0))}</dd>
+              <dd className="whitespace-nowrap font-display text-xl font-bold text-ink-950 sm:text-2xl">{formatMoney(subtotal + (quote?.delivery_fee ?? 0))}</dd>
             </div>
           </dl>
           {quote?.installment.length ? (

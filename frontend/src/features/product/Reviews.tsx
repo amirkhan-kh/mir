@@ -64,8 +64,8 @@ export function Reviews({ product: p }: { product: ProductDetail }) {
   const t = useT();
   const total = Object.values(p.rating_breakdown).reduce((s, n) => s + n, 0);
   return (
-    <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
-      <div className="space-y-5">
+    <div className="grid items-start gap-3 sm:gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <div className="space-y-3 sm:space-y-4">
         <div className="rounded-2xl bg-white p-5">
           <p className="font-display text-5xl font-bold text-ink-950">{Number(p.rating_avg).toFixed(1)}</p>
           <div className="mt-2">
@@ -94,7 +94,7 @@ export function Reviews({ product: p }: { product: ProductDetail }) {
         {p.reviews.length ? (
           <ul className="space-y-3">
             {p.reviews.map((r) => (
-              <li key={r.id} className="rounded-2xl bg-white p-5">
+              <li key={r.id} className="rounded-2xl bg-white p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="flex items-center gap-2.5 font-semibold text-ink-900">
                     <span className="grid size-9 place-items-center rounded-full bg-lime-200 text-sm font-bold text-ink-950">{r.author.slice(0, 1).toUpperCase()}</span>

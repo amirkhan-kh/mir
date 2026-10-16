@@ -17,10 +17,10 @@ export function BuyBox({ product: p, plans }: { product: ProductDetail; plans: I
   const off = discountPercent(p.price, p.old_price);
 
   return (
-    <div className="space-y-4 rounded-3xl bg-white p-5 shadow-card ring-1 ring-ink-100 sm:p-6">
+    <div className="space-y-4 rounded-3xl bg-white p-4 shadow-card ring-1 ring-ink-100 sm:p-5">
       <div>
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <p className="font-display text-[32px] font-bold leading-none tracking-tight text-ink-950">{formatMoney(p.price)}</p>
+          <p className="whitespace-nowrap font-display text-[28px] font-bold leading-none tracking-tight text-ink-950 xl:text-[32px]">{formatMoney(p.price)}</p>
           {off ? <span className="rounded-lg bg-flame-500 px-2 py-0.5 text-sm font-bold text-white">−{off}%</span> : null}
         </div>
         {p.old_price ? (
@@ -89,21 +89,22 @@ export function MobileBuyBar({ product: p }: { product: ProductDetail }) {
   const t = useT();
   const inCart = useCart().some((l) => l.id === p.id);
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-ink-100 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-ink-100 bg-white/95 px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
       <div className="min-w-0 flex-1">
-        {p.old_price ? <p className="text-xs text-ink-400 line-through">{formatMoney(p.old_price)}</p> : null}
-        <p className="font-display text-lg font-bold text-ink-950">{formatMoney(p.price)}</p>
+        {p.old_price ? <p className="text-xs leading-4 text-ink-400 line-through">{formatMoney(p.old_price)}</p> : null}
+        <p className="whitespace-nowrap font-display text-base font-bold leading-6 text-ink-950 sm:text-lg">{formatMoney(p.price)}</p>
       </div>
       {p.stock <= 0 ? (
         <span className="rounded-xl bg-ink-100 px-4 py-3 text-sm font-semibold text-ink-500">{t.card.outOfStock}</span>
       ) : inCart ? (
-        <a href="/savat" className="flex h-12 items-center gap-2 rounded-xl bg-ink-950 px-5 font-semibold text-white">
+        <a href="/savat" className="flex h-12 shrink-0 items-center gap-2 rounded-xl bg-ink-950 px-5 font-semibold text-white">
           {t.card.goToCart}
         </a>
       ) : (
-        <button type="button" onClick={() => addToCart(p)} className="flex h-12 items-center gap-2 rounded-xl bg-lime-400 px-5 font-semibold text-ink-950">
+        <button type="button" onClick={() => addToCart(p)} className="flex h-12 shrink-0 items-center gap-2 rounded-xl bg-lime-400 px-5 font-semibold text-ink-950">
           <ShoppingBag className="size-4.5" aria-hidden />
-          {t.card.addToCartLong}
+          <span className="sm:hidden">{t.card.addToCart}</span>
+          <span className="hidden sm:inline">{t.card.addToCartLong}</span>
         </button>
       )}
     </div>
