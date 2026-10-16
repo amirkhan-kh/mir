@@ -15,7 +15,7 @@ export function ProductCard({ product: p, plan, preload = false }: { product: Pr
   const out = p.stock <= 0;
   const [img, img2] = p.images;
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white transition-shadow duration-300 hover:shadow-lift">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow duration-300 hover:shadow-lift">
       <Link href={`/mahsulot/${p.slug}`} className="relative block aspect-square overflow-hidden bg-ink-50" aria-label={p.name}>
         {img ? (
           <>
