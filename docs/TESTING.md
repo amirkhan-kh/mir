@@ -154,7 +154,7 @@ Each screen gets its own copies: `ORD-L1`, `PRD-L1`, …
 
 | ID | Function | S1 | S2 | S3 |
 |---|---|---|---|---|
-| CHK-01 | Contact step (ism, telefon) | Valid → next step; phone saved as `+998XXXXXXXXX` | Saved customer prefilled on return; `O'g'il` name | Empty / short phone → blocked |
+| CHK-01 | Contact step (ism, telefon) | Valid → next step; phone saved as `+996XXXXXXXXX` | Saved customer prefilled on return; `O'g'il` name | Empty / short phone → blocked |
 | CHK-02 | Delivery (kuryer / olib ketish) + payment (naqd / karta / muddatli) | Courier adds fee under threshold; pickup → 0 fee; installment shows month cards | Address required only for courier | Installment without plan → blocked |
 | CHK-03 | Submit | Order created `new`, stock −qty, cart cleared, `/buyurtma/<number>` shown | Same idempotency key re-submit → same order, stock once | Stock gone meanwhile → 409 message, cart kept; API 500 → error; double click → one order |
 

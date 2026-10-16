@@ -16,11 +16,12 @@ export function slugify(input: string): string {
     .slice(0, 80) || "item";
 }
 
-/** Normalizes an Uzbek phone number to +998XXXXXXXXX, or returns null. */
+/** Normalizes a Kyrgyz phone number to +996XXXXXXXXX, or returns null. */
 export function normalizePhone(input: string): string | null {
   const digits = input.replace(/\D/g, "");
-  if (digits.length === 9) return `+998${digits}`;
-  if (digits.length === 12 && digits.startsWith("998")) return `+${digits}`;
+  if (digits.length === 10 && digits.startsWith("0")) return `+996${digits.slice(1)}`;
+  if (digits.length === 9) return `+996${digits}`;
+  if (digits.length === 12 && digits.startsWith("996")) return `+${digits}`;
   return null;
 }
 

@@ -9,9 +9,9 @@ import { BANNERS, CATEGORIES, CUSTOMERS, PENDING_REVIEW, PRODUCTS, REVIEWS, prod
 import { slugify } from "./text.js";
 
 const STAFF = [
-  { username: "manager", full_name: "Малика Менеджер", phone: "+998901000001", role: "manager" },
-  { username: "courier1", full_name: "Бекзод Курьер", phone: "+998901000002", role: "courier" },
-  { username: "courier2", full_name: "Рустам Курьер", phone: "+998901000003", role: "courier" },
+  { username: "manager", full_name: "Айгерим Менеджер", phone: "+996555323001", role: "manager" },
+  { username: "courier1", full_name: "Нурлан Курьер", phone: "+996700323002", role: "courier" },
+  { username: "courier2", full_name: "Бакыт Курьер", phone: "+996555323003", role: "courier" },
 ];
 
 const seedDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../public/uploads/seed");
@@ -133,7 +133,7 @@ export async function seed() {
       const o = await db.query(
         `INSERT INTO orders (customer_name, phone, region, address, delivery_method, payment_method, status, subtotal,
                              delivery_fee, total, assignee_id, created_at, updated_at)
-         VALUES ($1, $2, $3, 'ул. Мустакиллик, д. 12', 'courier', $4, $5, $6, $7, $8, $9,
+         VALUES ($1, $2, $3, 'Манас көчөсү, 12', 'courier', $4, $5, $6, $7, $8, $9,
                  now() - ($10 || ' days')::interval - ($11 || ' hours')::interval, now() - ($10 || ' days')::interval)
          RETURNING id`,
         [name, phone, region, i % 3 === 0 ? "card" : "cash", status, subtotal, fee, subtotal + fee, assignee,
@@ -148,7 +148,7 @@ export async function seed() {
       }
       await db.query(
         `INSERT INTO order_events (order_id, status, note, created_at)
-         SELECT id, 'new', 'Заказ принят с сайта', created_at FROM orders WHERE id = $1`,
+         SELECT id, 'new', 'Буйрутма сайттан кабыл алынды', created_at FROM orders WHERE id = $1`,
         [o.rows[0].id],
       );
       if (status !== "new") {

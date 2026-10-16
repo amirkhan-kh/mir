@@ -137,7 +137,7 @@ export const create = (input: CheckoutInput) =>
     if (!order) return repo.byIdempotencyKey(db, input.idempotency_key!);
     await repo.insertItems(db, order.id, items);
     for (const i of items) await repo.changeStock(db, i.product_id, -i.qty);
-    await repo.addEvent(db, order.id, "new", "Заказ принят с сайта", null);
+    await repo.addEvent(db, order.id, "new", "Буйрутма сайттан кабыл алынды", null);
     return order;
   });
 

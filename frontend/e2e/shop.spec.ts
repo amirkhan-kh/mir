@@ -37,7 +37,7 @@ test.describe("storefront", () => {
   });
 
   test("[SHOP-02][S1] category tile opens the category catalog", async ({ page, request }) => {
-    const cats = (await (await request.get("/api/v1/public/categories")).json()) as { name: string; slug: string; product_count: number }[];
+    const cats = (await (await request.get("/api/v1/public/categories?lang=ru")).json()) as { name: string; slug: string; product_count: number }[];
     const cat = cats.find((c) => c.product_count > 0)!;
     await page.goto("/");
     await page.getByRole("link", { name: cat.name }).first().click();

@@ -85,7 +85,7 @@ test.describe("API invariants @backend", () => {
 
     // 422: checkout with an empty cart fails validation.
     const res = await request.post("/api/v1/public/orders", {
-      data: { customer_name: "Тест", phone: "+998901234567", region: "Андижан", address: "", delivery_method: "pickup", payment_method: "cash", items: [] },
+      data: { customer_name: "Тест", phone: "+996555323456", region: "Өзгөн", address: "", delivery_method: "pickup", payment_method: "cash", items: [] },
     });
     expect(res.status()).toBe(422);
     expect(((await res.json()) as ApiErr).error).toBeTruthy();

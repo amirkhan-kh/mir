@@ -45,7 +45,7 @@ export function TrackForm({ initialNumber = "" }: { initialNumber?: string }) {
     >
       <Field label={t.track.number}>{(id) => <Input id={id} name="number" required defaultValue={initialNumber} placeholder="MIR-1001" pattern="[A-Za-z]{3}-?\d+" maxLength={20} />}</Field>
       <Field label={t.track.phone} hint={t.track.phoneHint}>
-        {(id) => <Input id={id} name="phone" type="tel" inputMode="tel" required placeholder="+998 90 123 45 67" minLength={9} maxLength={20} />}
+        {(id) => <Input id={id} name="phone" type="tel" inputMode="tel" required placeholder="+996 555 123 456" minLength={9} maxLength={20} />}
       </Field>
       {error ? <Alert>{error}</Alert> : null}
       <Button type="submit" variant="dark" size="lg" className="w-full" disabled={saving}>

@@ -44,7 +44,7 @@ export interface Shopper {
 }
 
 export async function loadCatalog(request: APIRequestContext): Promise<Catalog> {
-  const res = await request.get("/api/v1/public/products?limit=60&sort=popular");
+  const res = await request.get("/api/v1/public/products?limit=60&sort=popular&lang=ru");
   expect(res.ok(), "catalog must load").toBeTruthy();
   const { items: all } = (await res.json()) as ProductList;
   const inStock = all.filter((p) => p.stock > 0);
@@ -81,6 +81,7 @@ function shopperFor(page: Page): Shopper {
 export const test = base.extend<Fixtures>({
   guard: [
     async ({ page }, use, testInfo) => {
+      await page.context().addCookies([{ name: "mir_lang", value: "ru", domain: "localhost", path: "/" }]);
       const errors: string[] = [];
       const allowed: RegExp[] = [];
       page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
@@ -111,8 +112,8 @@ export const test = base.extend<Fixtures>({
   },
 });
 
-/** Reads the formatted money shown in the UI back to a number: "9 490 000 сум" → 9490000. */
+/** Reads the formatted money shown in the UI back to a number: "65 400 сом" → 65400. */
 export const parseMoney = (s: string) => Number(s.replace(/[^\d]/g, ""));
 
 /** Mirrors `formatMoney` without importing Intl assumptions into tests. */
-export const money = (n: number) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(n)).replace(/\u00a0|\u202f/g, " ")} сум`;
+export const money = (n: number) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(n)).replace(/\u00a0|\u202f/g, " ")} сом`;

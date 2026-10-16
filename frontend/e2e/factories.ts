@@ -122,8 +122,8 @@ export type AdminApi = Awaited<ReturnType<typeof adminApi>>;
 export const checkoutBody = (p: { id: number }, unique: (p?: string) => string, over: Partial<CheckoutBody> = {}): CheckoutBody => ({
   idempotency_key: unique("idem"),
   customer_name: "Тест Покупатель",
-  phone: "+998901234567",
-  region: "Андижан",
+  phone: "+996555123456",
+  region: "Өзгөн",
   address: "ул. Тестовая, д. 1",
   delivery_method: "pickup",
   payment_method: "cash",

@@ -72,16 +72,16 @@ function Editor({ initial }: { initial: Store }) {
         {text("phone2", tr.phone2)}
         {text("address", tr.address, tr.addressHint)}
         {text("hours", tr.hours)}
-        {text("telegram", tr.telegram)}
+        {text("whatsapp", tr.whatsapp)}
         {text("instagram", tr.instagram)}
       </Section>
 
       <Section title={tr.delivery}>
         <Field label={tr.fee}>
-          {(id) => <Input id={id} type="number" min={0} step={1000} required value={s.delivery_fee} onChange={(e) => set("delivery_fee", Number(e.target.value))} />}
+          {(id) => <Input id={id} type="number" min={0} step={50} required value={s.delivery_fee} onChange={(e) => set("delivery_fee", Number(e.target.value))} />}
         </Field>
         <Field label={tr.freeFrom} hint={tr.freeFromHint}>
-          {(id) => <Input id={id} type="number" min={0} step={10000} required value={s.free_delivery_from} onChange={(e) => set("free_delivery_from", Number(e.target.value))} />}
+          {(id) => <Input id={id} type="number" min={0} step={500} required value={s.free_delivery_from} onChange={(e) => set("free_delivery_from", Number(e.target.value))} />}
         </Field>
         {text("delivery_note", tr.note)}
         <Field label={tr.regions} hint={tr.regionsHint} className="sm:col-span-2">

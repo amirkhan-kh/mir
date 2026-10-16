@@ -99,7 +99,7 @@ export interface Store {
   phone2: string;
   address: string;
   hours: string;
-  telegram: string;
+  whatsapp: string;
   instagram: string;
   delivery_fee: number;
   free_delivery_from: number;

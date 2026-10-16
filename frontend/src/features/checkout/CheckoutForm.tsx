@@ -18,7 +18,7 @@ const PROFILE_KEY = "mir_customer";
 
 function formatLocal(digits: string) {
   const d = digits.slice(0, 9);
-  return [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean).join(" ");
+  return [d.slice(0, 3), d.slice(3, 6), d.slice(6, 9)].filter(Boolean).join(" ");
 }
 
 function Option({ name, value, checked, onChange, icon, title, hint }: { name: string; value: string; checked: boolean; onChange: () => void; icon: ReactNode; title: string; hint: ReactNode }) {
@@ -109,7 +109,7 @@ export function CheckoutForm({ store }: { store: Store }) {
         json: {
           idempotency_key: idem.current,
           customer_name: name,
-          phone: `+998${phone.replace(/\D/g, "")}`,
+          phone: `+996${phone.replace(/\D/g, "")}`,
           region: delivery === "courier" ? f.get("region") : t.checkout.pickupRegion,
           address: delivery === "courier" ? f.get("address") : "",
           comment: f.get("comment") ?? "",
@@ -142,16 +142,16 @@ export function CheckoutForm({ store }: { store: Store }) {
             <Field label={t.checkout.phone} hint={t.checkout.phoneHint}>
               {(id) => (
                 <div className="flex h-11 items-center rounded-xl border border-ink-200 bg-white focus-within:border-leaf-600 focus-within:ring-4 focus-within:ring-lime-300/40">
-                  <span className="pl-3.5 pr-1 text-[15px] font-medium text-ink-600">+998</span>
+                  <span className="pl-3.5 pr-1 text-[15px] font-medium text-ink-600">+996</span>
                   <input
                     id={id}
                     type="tel"
                     inputMode="numeric"
                     autoComplete="tel-national"
                     required
-                    placeholder="90 123 45 67"
+                    placeholder="555 123 456"
                     value={formatLocal(phone)}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").replace(/^998/, "").slice(0, 9))}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").replace(/^996/, "").slice(0, 9))}
                     className="h-full flex-1 rounded-r-xl bg-transparent pr-3 text-[15px] focus:outline-none"
                   />
                 </div>

@@ -1,11 +1,12 @@
 import { PackageSearch } from "lucide-react";
 import type { Metadata } from "next";
 import { TrackForm } from "@/features/checkout/OrderTracker";
-import { getT } from "@/shared/i18n/server";
+import { getLang, getT } from "@/shared/i18n/server";
+import { social } from "@/shared/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getT();
-  return { title: t.meta.track, description: t.meta.trackDescription, alternates: { canonical: "/kuzatish" } };
+  const [t, lang] = await Promise.all([getT(), getLang()]);
+  return { title: t.meta.track, description: t.meta.trackDescription, alternates: { canonical: "/kuzatish" }, ...social(lang, t.meta.track, t.meta.trackDescription) };
 }
 
 export default async function TrackPage() {

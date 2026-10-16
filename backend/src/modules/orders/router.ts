@@ -24,7 +24,7 @@ const checkoutSchema = z
     customer_name: z.string().trim().min(2, zmsg("Введите имя", "Атыңызды жазыңыз")).max(80),
     phone: z.string().trim().max(20).transform((v, ctx) => {
       const p = normalizePhone(v);
-      if (!p) ctx.addIssue({ code: "custom", message: zmsg("Неверный номер телефона (+998 XX XXX XX XX)", "Телефон номери туура эмес (+998 XX XXX XX XX)") });
+      if (!p) ctx.addIssue({ code: "custom", message: zmsg("Неверный номер телефона (+996 XXX XXX XXX)", "Телефон номери туура эмес (+996 XXX XXX XXX)") });
       return p ?? "";
     }),
     region: z.string().trim().min(2).max(60),

@@ -74,6 +74,10 @@ export interface SeedProduct {
 
 const BADGE_KY = { "Хит": "Хит", "Новинка": "Жаңы" } as const;
 
+/** Demo UZS amounts → Kyrgyz som (nearest 100). 1 сом ≈ 145 сум. */
+const som = (uzs: number) => Math.max(100, Math.round(uzs / 145 / 100) * 100);
+const somText = (n: number) => `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(n).replace(/\u00a0|\u202f/g, " ")} сом`;
+
 const phone = (screen: string, chip: string, ram: string, mem: string, cam: string, bat: string): Spec[] => [
   ["Экран", screen], ["Процессор", chip], ["Оперативная память", ram], ["Встроенная память", mem],
   ["Основная камера", cam], ["Аккумулятор", bat], ["SIM-карта", "2 (nano + eSIM)"],
@@ -203,6 +207,11 @@ export const PRODUCTS: SeedProduct[] = [
     specs: [["Мощность", "800 W"], ["Нож", "Нержавеющая сталь", "Дат баспаган болот"]] },
 ];
 
+for (const p of PRODUCTS) {
+  p.price = som(p.price);
+  if (p.old) p.old = som(p.old);
+}
+
 /** Every stored text of a seed product, in both languages. */
 export function productTexts(p: SeedProduct) {
   const warranty = p.warranty ?? 12;
@@ -233,11 +242,11 @@ export function productTexts(p: SeedProduct) {
 
 export const BANNERS = [
   { title: "Новый сезон — новая техника", title_ky: "Жаңы сезон — жаңы техника",
-    subtitle: "Скидки до 15% на смартфоны и ноутбуки. Бесплатная доставка от 1 млн сум.",
-    subtitle_ky: "Смартфондор жана ноутбуктарга 15% чейин арзандатуу. 1 млн сумдан баштап акысыз жеткирүү.",
+    subtitle: `Скидки до 15% на смартфоны и ноутбуки. Бесплатная доставка от ${somText(7_000)}.`,
+    subtitle_ky: `Смартфондор жана ноутбуктарга 15% чейин арзандатуу. ${somText(7_000)}дон баштап акысыз жеткирүү.`,
     image: "/uploads/seed/apple-macbook-pro-14-inch-space-grey/1.webp", link: "/katalog?discount=1",
     cta: "Смотреть скидки", cta_ky: "Арзандатууларды көрүү", theme: "dark", placement: "hero", sort: 1 },
-  { title: "iPhone 13 Pro — 9 490 000 сум", title_ky: "iPhone 13 Pro — 9 490 000 сум",
+  { title: `iPhone 13 Pro — ${somText(PRODUCTS[0].price)}`, title_ky: `iPhone 13 Pro — ${somText(PRODUCTS[0].price)}`,
     subtitle: "Рассрочка на 3, 6 или 12 месяцев. Официальная гарантия 12 месяцев.",
     subtitle_ky: "3, 6 же 12 айга бөлүп төлөө. Расмий кепилдик 12 ай.",
     image: "/uploads/seed/iphone-13-pro/1.webp", link: "/mahsulot/apple-iphone-13-pro-128-gb",
@@ -258,21 +267,21 @@ export const BANNERS = [
 ];
 
 export const REVIEWS: [string, number, string][] = [
-  ["Азиза", 5, "Очень быстро доставили, товар оригинальный. Спасибо!"],
-  ["Жасур", 5, "Цена ниже, чем на рынке, и есть гарантия. Рекомендую."],
-  ["Дилноза", 4, "Всё хорошо, только коробка была немного помята."],
-  ["Сардор", 5, "Курьер позвонил и привёз в оговорённое время."],
-  ["Нодира", 4, "Качество хорошее. Рассрочка очень удобная."],
-  ["Отабек", 3, "Хорошо, но цвет немного отличается от фото."],
+  ["Айгерим", 5, "Абдан тез жеткиришти, товар оригинал. Рахмат!"],
+  ["Нурлан", 5, "Баасы базардагыдан төмөн, кепилдик бар. Сунуштайм."],
+  ["Айзада", 4, "Баары жакшы, куту гана бир аз бүктөлгөн."],
+  ["Бакыт", 5, "Курьер чалып, макулдашкан убакта алып келди."],
+  ["Жылдыз", 4, "Сапаты жакшы. Бөлүп төлөө абдан ыңгайлуу."],
+  ["Эрлан", 3, "Жакшы, бирок түсү сүрөттөгүдөн бир аз айырмаланат."],
 ];
 
 /** The one pending review on the first product. */
-export const PENDING_REVIEW: [string, number, string] = ["Камола", 5, "Отличный телефон, камера супер!"];
+export const PENDING_REVIEW: [string, number, string] = ["Асел", 5, "Эң сонун телефон, камерасы супер!"];
 
 export const CUSTOMERS: [string, string, string][] = [
-  ["Азиза Каримова", "+998901112233", "г. Ташкент"],
-  ["Жасур Рахимов", "+998935554433", "Ташкентская область"],
-  ["Дилноза Юсупова", "+998977778899", "Самарканд"],
-  ["Сардор Алиев", "+998998887766", "г. Ташкент"],
-  ["Нодира Исламова", "+998946665544", "Фергана"],
+  ["Айгерим Бекмаматова", "+996555323111", "Өзгөн"],
+  ["Нурлан Садыков", "+996700323443", "Ош"],
+  ["Айзада Токтосунова", "+996777323889", "Кара-Суу"],
+  ["Бакыт Асанов", "+996550323776", "Өзгөн"],
+  ["Жылдыз Мамытова", "+996500323554", "Ноокат"],
 ];

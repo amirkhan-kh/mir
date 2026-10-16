@@ -1,7 +1,7 @@
 export type Lang = "ru" | "ky";
 
-export const LANGS: readonly Lang[] = ["ru", "ky"];
-export const DEFAULT_LANG: Lang = "ru";
+export const LANGS: readonly Lang[] = ["ky", "ru"];
+export const DEFAULT_LANG: Lang = "ky";
 /** Read by the Next server, the mock API and the Express API alike. */
 export const LANG_COOKIE = "mir_lang";
 

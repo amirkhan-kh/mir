@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { expect, money, ru, test, type Catalog, type Shopper } from "./fixtures";
 
 /** Fill step 1 and land on a valid pickup order (no address needed). */
-async function fillContact(page: Page, phone = "901234567") {
+async function fillContact(page: Page, phone = "555123456") {
   await page.getByLabel(ru.checkout.fullName).fill("Тест Покупатель");
   await page.getByLabel(ru.checkout.phone, { exact: false }).fill(phone);
   await page.getByRole("radio", { name: ru.checkout.pickup }).check({ force: true });
@@ -19,7 +19,7 @@ test.describe("checkout", () => {
     await seed(shopper, catalog);
     await page.goto("/rasmiylashtirish");
     await fillContact(page);
-    await expect(page.getByLabel(ru.checkout.phone, { exact: false })).toHaveValue("90 123 45 67");
+    await expect(page.getByLabel(ru.checkout.phone, { exact: false })).toHaveValue("555 123 456");
     await expect(page.getByRole("button", { name: ru.checkout.submit })).toBeEnabled();
   });
 
@@ -67,7 +67,7 @@ test.describe("checkout", () => {
     const p = await seed(shopper, catalog);
     const number = "MIR-7777";
     await page.route("**/api/v1/public/orders?*", (r) =>
-      r.fulfill({ status: 201, json: { number, total: p.price, status: "new", phone: "+998901234567" } }),
+      r.fulfill({ status: 201, json: { number, total: p.price, status: "new", phone: "+996555123456" } }),
     );
     await page.route(`**/api/v1/public/orders/${number}?*`, (r) =>
       r.fulfill({
@@ -76,7 +76,7 @@ test.describe("checkout", () => {
           number,
           status: "new",
           customer_name: "Тест Покупатель",
-          phone: "+998901234567",
+          phone: "+996555123456",
           region: ru.checkout.pickupRegion,
           address: "",
           comment: "",

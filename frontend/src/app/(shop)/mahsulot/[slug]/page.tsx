@@ -7,9 +7,10 @@ import { BuyBox, MobileBuyBar } from "@/features/product/BuyBox";
 import { ProductGallery } from "@/features/product/ProductGallery";
 import { Reviews } from "@/features/product/Reviews";
 import { ProductRail } from "@/features/storefront/HomeSections";
-import { getT } from "@/shared/i18n/server";
+import { getLang, getT } from "@/shared/i18n/server";
 import { longestPlan } from "@/shared/lib/installment";
 import { formatMoney } from "@/shared/lib/format";
+import { social } from "@/shared/lib/seo";
 import { getStore, serverGet } from "@/shared/lib/server";
 import type { ProductDetail } from "@/shared/lib/types";
 import { Stars } from "@/shared/ui/Stars";
@@ -19,13 +20,14 @@ type Props = { params: Promise<{ slug: string }> };
 const load = (slug: string) => serverGet<ProductDetail>(`/public/products/${encodeURIComponent(slug)}`);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const [p, t] = await Promise.all([params.then(({ slug }) => load(slug)), getT()]);
+  const [p, t, lang] = await Promise.all([params.then(({ slug }) => load(slug)), getT(), getLang()]);
   if (!p) return { title: t.meta.productMissing };
+  const description = `${p.name} — ${formatMoney(p.price)}. ${p.short_description}`.slice(0, 160);
   return {
     title: p.name,
-    description: `${p.name} — ${formatMoney(p.price)}. ${p.short_description}`.slice(0, 160),
+    description,
     alternates: { canonical: `/mahsulot/${p.slug}` },
-    openGraph: { title: p.name, images: p.images.slice(0, 1) },
+    ...social(lang, p.name, description, p.images[0]),
   };
 }
 
@@ -43,7 +45,7 @@ export default async function ProductPage({ params }: Props) {
     brand: p.brand ? { "@type": "Brand", name: p.brand } : undefined,
     offers: {
       "@type": "Offer",
-      priceCurrency: "UZS",
+      priceCurrency: "KGS",
       price: p.price,
       availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },

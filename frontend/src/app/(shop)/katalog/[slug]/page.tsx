@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CatalogView } from "@/features/catalog/CatalogView";
-import { getT } from "@/shared/i18n/server";
+import { getLang, getT } from "@/shared/i18n/server";
+import { social } from "@/shared/lib/seo";
 import { serverGet } from "@/shared/lib/server";
 import type { Category } from "@/shared/lib/types";
 
@@ -12,12 +13,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [category, t] = await Promise.all([serverGet<Category>(`/public/categories/${encodeURIComponent(slug)}`), getT()]);
+  const [category, t, lang] = await Promise.all([serverGet<Category>(`/public/categories/${encodeURIComponent(slug)}`), getT(), getLang()]);
   if (!category) return { title: t.meta.categoryMissing };
+  const description = t.meta.categoryDescription(category.name, category.product_count);
   return {
     title: category.name,
-    description: t.meta.categoryDescription(category.name, category.product_count),
+    description,
     alternates: { canonical: `/katalog/${category.slug}` },
+    ...social(lang, category.name, description),
   };
 }
 

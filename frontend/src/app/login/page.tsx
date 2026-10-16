@@ -2,17 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/features/auth/LoginForm";
-import { getT } from "@/shared/i18n/server";
+import { getLang, getT } from "@/shared/i18n/server";
+import { social } from "@/shared/lib/seo";
 import { LangSwitch } from "@/shared/ui/LangSwitch";
 import { Logo } from "@/shared/ui/Logo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getT();
+  const [t, lang] = await Promise.all([getT(), getLang()]);
   return {
     title: t.meta.login,
     description: t.meta.loginDescription,
     robots: { index: false },
     alternates: { canonical: "/login" },
+    ...social(lang, t.meta.login, t.meta.loginDescription),
   };
 }
 

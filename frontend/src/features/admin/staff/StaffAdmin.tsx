@@ -91,7 +91,7 @@ function StaffForm({ initial, onSaved }: { initial: Staff | null; onSaved: (msg:
     >
       <Field label={tr.fullName}>{(id) => <Input id={id} name="full_name" required minLength={2} maxLength={120} defaultValue={initial?.full_name} />}</Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={tr.phone}>{(id) => <Input id={id} name="phone" type="tel" maxLength={20} defaultValue={initial?.phone ?? ""} placeholder="+998 90 123 45 67" />}</Field>
+        <Field label={tr.phone}>{(id) => <Input id={id} name="phone" type="tel" maxLength={20} defaultValue={initial?.phone ?? ""} placeholder="+996 555 123 456" />}</Field>
         {initial ? null : (
           <Field label={tr.login} hint={tr.loginHint}>
             {(id) => <Input id={id} name="username" required minLength={3} maxLength={40} pattern="[A-Za-z0-9._\-]+" autoComplete="off" />}

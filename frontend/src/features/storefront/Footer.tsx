@@ -1,4 +1,4 @@
-import { Clock, MapPin, Phone, Send } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
 import { getT } from "@/shared/i18n/server";
 import type { Category, Store } from "@/shared/lib/types";
@@ -58,11 +58,11 @@ export async function Footer({ store, categories }: { store: Store; categories: 
               <Clock className="size-4 text-lime-400" aria-hidden />
               {store.hours}
             </li>
-            {store.telegram ? (
+            {store.whatsapp ? (
               <li>
-                <a href={store.telegram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 font-semibold text-white hover:bg-white/15">
-                  <Send className="size-4 text-lime-400" aria-hidden />
-                  Telegram
+                <a href={store.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 font-semibold text-white hover:bg-white/15">
+                  <MessageCircle className="size-4 text-lime-400" aria-hidden />
+                  WhatsApp
                 </a>
               </li>
             ) : null}

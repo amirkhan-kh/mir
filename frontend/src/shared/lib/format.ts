@@ -2,12 +2,12 @@ import type { Dict } from "@/shared/i18n/dict";
 
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 
-/** Same currency word in Russian and Kyrgyz. */
-export const CURRENCY = "сум";
+/** Kyrgyz som — the same word in Russian and Kyrgyz. */
+export const CURRENCY = "сом";
 
 export const formatNumber = (n: number) => money.format(Math.round(n)).replace(/\u00a0|\u202f/g, " ");
 
-/** 9490000 → "9 490 000 сум" */
+/** 65400 → "65 400 сом" */
 export const formatMoney = (n: number) => `${formatNumber(n)} ${CURRENCY}`;
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -29,11 +29,11 @@ export function formatRelative(iso: string, t: Dict["time"]) {
   return formatDate(iso, true);
 }
 
-/** +998901234567 → "+998 90 123 45 67" */
+/** +996555123456 → "+996 555 123 456" */
 export function formatPhone(p: string) {
   const d = p.replace(/\D/g, "");
   if (d.length !== 12) return p;
-  return `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10)}`;
+  return `+${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6, 9)} ${d.slice(9)}`;
 }
 
 export const discountPercent = (price: number, old: number | null) =>

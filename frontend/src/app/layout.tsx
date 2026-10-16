@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Unbounded } from "next/font/google";
 import { LangProvider } from "@/shared/i18n/client";
-import { LANG_META } from "@/shared/i18n/config";
 import { getLang, getT } from "@/shared/i18n/server";
+import { social } from "@/shared/lib/seo";
 import { SITE_URL as site } from "@/shared/lib/site";
 import "./globals.css";
 
@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: t.meta.title, template: "%s — Mir" },
     description: t.meta.description,
     applicationName: "Mir",
-    openGraph: { type: "website", locale: LANG_META[lang].og, siteName: "Mir" },
+    ...social(lang, t.meta.title, t.meta.description),
     icons: { icon: "/icon.svg" },
   };
 }

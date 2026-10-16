@@ -28,7 +28,7 @@ data.categories = data.categories.map((c: { slug: string }) => {
 data.products = data.products.map((p: { images: string[] }, i: number) => {
   const seed = PRODUCTS[i];
   if (!seed || (p.images.length && imgOf(p.images) !== seed.img)) throw new Error(`Product #${i + 1} does not match seed order`);
-  return { ...p, slug: slugify(seed.name), ...productTexts(seed) };
+  return { ...p, slug: slugify(seed.name), price: seed.price, old_price: seed.old ?? null, ...productTexts(seed) };
 });
 
 data.banners = data.banners.map((b: { placement: string; sort: number }) => {
@@ -38,12 +38,13 @@ data.banners = data.banners.map((b: { placement: string; sort: number }) => {
   return { ...b, title, title_ky, subtitle, subtitle_ky, link, cta, cta_ky };
 });
 
-/** Authors of the previous (Uzbek) seed, in `REVIEWS` order. */
-const LEGACY_AUTHORS = ["Aziza", "Jasur", "Dilnoza", "Sardor", "Nodira", "Otabek"];
+/** Authors of earlier seeds, in `REVIEWS` order. */
+const LEGACY_AUTHORS = ["Aziza", "Jasur", "Dilnoza", "Sardor", "Nodira", "Otabek", "Азиза", "Жасур", "Дилноза", "Сардор", "Нодира", "Отабек"];
 data.reviews = data.reviews.map((r: { author: string; rating: number }) => {
-  const at = Math.max(LEGACY_AUTHORS.indexOf(r.author), REVIEWS.findIndex(([a]) => a === r.author));
-  if (at < 0) return r;
-  const [author, rating, text] = REVIEWS[at];
+  const legacy = LEGACY_AUTHORS.indexOf(r.author);
+  const slot = legacy >= 0 ? legacy % REVIEWS.length : REVIEWS.findIndex(([a]) => a === r.author);
+  if (slot < 0) return r;
+  const [author, rating, text] = REVIEWS[slot];
   return { ...r, author, rating, text };
 });
 

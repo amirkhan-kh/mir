@@ -1,7 +1,7 @@
 import type { Request } from "express";
 
 export type Lang = "ru" | "ky";
-export const LANGS: readonly Lang[] = ["ru", "ky"];
+export const LANGS: readonly Lang[] = ["ky", "ru"];
 export const LANG_COOKIE = "mir_lang";
 
 /** A user-facing message in every supported language. */
@@ -14,9 +14,9 @@ export const msg = (ru: string, ky: string): Msg => ({ ru, ky });
 
 const asLang = (v: unknown): Lang | null => (v === "ru" || v === "ky" ? v : null);
 
-/** Request language: `?lang=` (server-side reads), then `X-Lang`, then the site cookie. Russian by default. */
+/** Request language: `?lang=` (server-side reads), then `X-Lang`, then the site cookie. Kyrgyz by default. */
 export function langOf(req: Request): Lang {
-  return asLang(req.query?.lang) ?? asLang(req.headers["x-lang"]) ?? asLang(req.cookies?.[LANG_COOKIE]) ?? "ru";
+  return asLang(req.query?.lang) ?? asLang(req.headers["x-lang"]) ?? asLang(req.cookies?.[LANG_COOKIE]) ?? "ky";
 }
 
 /**
